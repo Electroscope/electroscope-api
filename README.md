@@ -1,5 +1,5 @@
-Election API
-============
+Electroscope API
+================
 
 The most incredible Myanmar election data center power by apalar peoples.
 
