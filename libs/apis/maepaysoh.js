@@ -88,7 +88,7 @@ MaePaySoh.candidate = {
   getList: function (page) {
     var that = this;
     return new Promise(function (resolve, reject) {
-      MaePaySoh.getList(that.LIST_URL, {page: (page || 1)})
+      MaePaySoh.getList(that.LIST_URL, { page: (page || 1)})
         .then(function (data) {
             resolve({
               candidates: data.data,

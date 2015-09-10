@@ -1,7 +1,6 @@
-global.$ = require("../global.js");
+global.$ = require("../../global.js");
 var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
-var should = require("should");
-
+var should = require("should"); 
 describe("MaePaySoh API", function () {
   describe("#getToken()", function () {
     it("should return host for candidates", function (done) {
@@ -46,6 +45,7 @@ describe("MaePaySoh API", function () {
   describe("MaePaySoh.party", function(){
     describe("#getList()", function(){
       it("should return list of candidate", function(done){
+        this.timeout(4000);
         MaePaySohAPI.party.getList()
           .then(function (data){
             done();
@@ -56,5 +56,4 @@ describe("MaePaySoh API", function () {
       });
     });
   });
-
 });
