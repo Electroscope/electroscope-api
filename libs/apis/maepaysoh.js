@@ -46,9 +46,9 @@ var MaePaySoh = {
       }));
     });
   },
-  getOne: function (collectionName, id) {
+  getOne: function (collectionUrl, id) {
     var that = this;
-    var url = that.host + collectionName + "/" + id;
+    var url = that.host + collectionUrl + "/" + id;
     return new Promise(function (resolve, reject) {
       request.get({
         url: url,
@@ -62,9 +62,9 @@ var MaePaySoh = {
       }));
     });
   },
-  getList: function (collectionName, query) {
+  getList: function (collectionUrl, query) {
     var that = this;
-    var url = that.host + collectionName + "/list";
+    var url = that.host + collectionUrl;
     query = query || {};
     query.token = that._token;
     return new Promise(function (resolve, reject) {
@@ -83,10 +83,12 @@ var MaePaySoh = {
 };
 
 MaePaySoh.candidate = {
+  DETAIL_URL: "candidate",
+  LIST_URL: "candidate/list",
   getList: function (page) {
     var that = this;
     return new Promise(function (resolve, reject) {
-      MaePaySoh.getList("candidate", {page: (page || 1)})
+      MaePaySoh.getList(that.LIST_URL, {page: (page || 1)})
         .then(function (data) {
             resolve({
               candidates: data.data,
@@ -120,4 +122,20 @@ MaePaySoh.candidate = {
   }
 };
 
+MaePaySoh.party = {
+  DETAIL_URL: "party/detail",
+  LIST_URL: "party",
+  getList: function () {
+    var that = this;
+    return new Promise(function (resolve, reject) {
+      MaePaySoh.getList(that.LIST_URL)
+        .then(function (data) { 
+            resolve({ parties: data.data });
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    });
+  }
+};
 module.exports = MaePaySoh;

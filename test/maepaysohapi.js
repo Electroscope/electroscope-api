@@ -43,4 +43,18 @@ describe("MaePaySoh API", function () {
       });
     });
   });
+  describe("MaePaySoh.party", function(){
+    describe("#getList()", function(){
+      it("should return list of candidate", function(done){
+        MaePaySohAPI.party.getList()
+          .then(function (data){
+            done();
+          })
+          .catch(function (err) {
+            done(err);
+          });
+      });
+    });
+  });
+
 });
