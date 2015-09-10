@@ -8,7 +8,7 @@ var CandidateHandler = {
         if (err) {
           reject(err);
         } else {
-          resolve(candidate);
+          resolve(candidate.toObject());
         }
       });
     });
@@ -17,7 +17,7 @@ var CandidateHandler = {
     var query = request.query;
     var data = request.data;
     return new Promise(function (resolve, reject) {
-      Candidate.findOneAndUpdate(query, {$set: data}, {new: true})
+      Candidate.findOneAndUpdate(query, {$set: data}, {new: true}).lean()
         .exec(function (err, candidate) {
           if (err) {
             reject(err);
@@ -30,7 +30,7 @@ var CandidateHandler = {
   get: function (request) {
     var query = request.query;
     return new Promise(function (resolve, reject) {
-      Candidate.find(query)
+      Candidate.find(query).lean()
         .exec(function (err, candidates) {
           if (err) {
             reject(err);
@@ -43,12 +43,12 @@ var CandidateHandler = {
   getOne: function (request) {
     var query = request.query;
     return new Promise(function (resolve, reject) {
-      Candidate.findOne(query)
-        .exec(function (err, candidates) {
+      Candidate.findOne(query).lean()
+        .exec(function (err, candidate) {
           if (err) {
             reject(err);
           } else {
-            resolve(candidates);
+            resolve(candidate);
           }
         });
     });

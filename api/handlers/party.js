@@ -8,7 +8,7 @@ var PartyHandler = {
         if (err) {
           reject(err);
         } else {
-          resolve(party);
+          resolve(party.toObject());
         }
       });
     });
@@ -17,7 +17,7 @@ var PartyHandler = {
     var query = request.query;
     var data = request.data;
     return new Promise(function (resolve, reject) {
-      Party.findOneAndUpdate(query, {$set: data}, {new: true})
+      Party.findOneAndUpdate(query, {$set: data}, {new: true}).lean()
         .exec(function (err, party) {
           if (err) {
             reject(err);
@@ -30,7 +30,7 @@ var PartyHandler = {
   get: function (request) {
     var query = request.query;
     return new Promise(function (resolve, reject) {
-      Party.find(query)
+      Party.find(query).lean()
         .exec(function (err, parties) {
           if (err) {
             reject(err);
@@ -43,12 +43,12 @@ var PartyHandler = {
   getOne: function (request) {
     var query = request.query;
     return new Promise(function (resolve, reject) {
-      Party.findOne(query)
-        .exec(function (err, parties) {
+      Party.findOne(query).lean()
+        .exec(function (err, party) {
           if (err) {
             reject(err);
           } else {
-            resolve(parties);
+            resolve(party);
           }
         });
     });
