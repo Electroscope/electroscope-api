@@ -45,27 +45,57 @@ var MaePaySoh = {
         }
       }));
     });
-  }
-};
-
-MaePaySoh.candidate = {
-  url: MaePaySoh.host + "candidate/list",
-  getList: function (page) {
+  },
+  getOne: function (collectionName, id) {
     var that = this;
+    var url = that.host + collectionName + "/" + id;
     return new Promise(function (resolve, reject) {
       request.get({
-        url: that.url,
-        qs: { token: MaePaySoh._token, page: (page || 1) }
+        url: url,
+        qs: { token: that._token }
       }, catchError(function (err, body) {
         if (err) {
           reject(err);
         } else {
-          resolve({
-            candidates: body.data,
-            pagin: body.meta.pagination
-          });
+          resolve(body);
         }
       }));
+    });
+  },
+  getList: function (collectionName, query) {
+    var that = this;
+    var url = that.host + collectionName + "/list";
+    query = query || {};
+    query.token = that._token;
+    return new Promise(function (resolve, reject) {
+      request.get({
+        url: url,
+        qs: query
+      }, catchError(function (err, data) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      }));
+    });
+  }
+};
+
+MaePaySoh.candidate = {
+  getList: function (page) {
+    var that = this;
+    return new Promise(function (resolve, reject) {
+      MaePaySoh.getList("candidate", {page: (page || 1)})
+        .then(function (data) {
+            resolve({
+              candidates: data.data,
+              pagin: data.meta.pagination
+            });
+        })
+        .catch(function (err) {
+          reject(err);
+        });
     });
   },
   getAll: function () {
