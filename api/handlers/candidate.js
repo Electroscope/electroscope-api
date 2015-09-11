@@ -1,5 +1,6 @@
 var Candidate = $.rootRequire("api/models/candidate");
 var Handler = $.rootRequire("api/handlers");
+var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 
 var CandidateHandler = new Handler(Candidate);
 
@@ -17,6 +18,5 @@ CandidateHandler.syncWithMaePaySoh = function () {
       .catch(reject);
   });
 };
-
 
 module.exports = CandidateHandler;
