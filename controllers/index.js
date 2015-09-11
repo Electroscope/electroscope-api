@@ -15,9 +15,9 @@ var Controller = function (name, applicationHandlersPath) {
     .rootRequire(applicationHandlersPath + "/" + name); 
   
   this.router.route("/" + name)
-    .get(function (req, res, next) {
+    .find(function (req, res, next) {
       // Get all objects
-      controller.makeResponse(handler.get, {
+      controller.makeResponse(handler.find, {
         query: req.query
       }, res, next);
     })
@@ -29,9 +29,9 @@ var Controller = function (name, applicationHandlersPath) {
     });
 
   this.router.route("/" + name + "/:id")
-    .get(function (req, res, next) {
+    .findOne(function (req, res, next) {
       // Get specific one 
-      controller.makeResponse(handler.getOne, {
+      controller.makeResponse(handler.findOne, {
         query: { _id: req.params.id }
       }, res, next);
     })
