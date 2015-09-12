@@ -25,7 +25,7 @@ var MaePaySoh = {
   host: "http://api.maepaysoh.org/",
   key: "09686031113147cf0e36eac34ababfca1c6874e2",
   // cache token
-  _token: null,
+  _token: "db424d6b-80e7-5f3f-bdab-700d4d689dc0",
   
   getToken: function (force) {
     var that = this;
@@ -88,30 +88,31 @@ MaePaySoh.candidate = {
   getList: function (page) {
     var that = this;
     return new Promise(function (resolve, reject) {
-      MaePaySoh.getList(that.LIST_URL, { page: (page || 1)})
+      MaePaySoh.getList(that.LIST_URL, { page: (page || 1), per_page: 200 })
         .then(function (data) {
-            resolve({
-              candidates: data.data,
-              pagin: data.meta.pagination
-            });
+          resolve({
+            candidates: data.data,
+            pagin: data.meta.pagination
+          });
         })
         .catch(function (err) {
           reject(err);
         });
     });
   },
-  getAll: function () {
+  getAll: function (pipe) {
     var that = this;
     return new Promise(function (resolve, reject) {
       function nextPage(candidates, pagin) {
         if (pagin.current_page < pagin.total_pages) {
           that.getList(pagin.current_page + 1)
             .then(function (data){
+              pipe(data.candidates, data.pagin);
               nextPage(candidates.concat(data.candidates), 
-                  data.pagin)
+                  data.pagin);
             })
             .catch(function (err) {
-              reject(err)
+              reject(err);
             });
         } else {
           resolve(candidates);
@@ -130,7 +131,9 @@ MaePaySoh.party = {
     return new Promise(function (resolve, reject) {
       MaePaySoh.getList(that.LIST_URL)
         .then(function (data) { 
-            resolve({ parties: data.data });
+          resolve({
+            parties: data.data
+          });
         })
         .catch(function (err) {
           reject(err);
