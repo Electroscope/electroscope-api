@@ -64,7 +64,7 @@ describe("TestHandler Handler CRUD test", function () {
       });
     });
 
-    it.skip("each should contain id", function () {
+    it("each should contain id", function () {
       result.forEach( item => item.should.have.property("id"));
     });
 
@@ -105,7 +105,7 @@ describe("TestHandler Handler CRUD test", function () {
       });
     });
 
-    it.skip("each should contain id", function () {
+    it("each should contain id", function () {
       result.forEach( item => item.should.have.property("id"));
     });
 
