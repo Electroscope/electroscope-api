@@ -16,6 +16,7 @@ const UPDATE_METHOD_MULTI = "update";
 
 function Handler(model) {
   this.model = model;
+  return this;
 }
 
 Handler.createQueryOption = function (query) {
@@ -38,10 +39,10 @@ Handler.prototype = {
    * @Promise#reslove Created object[s]
    */
   create: function (request) {
-    var handler = this;
+    var model = this.model;
     var data = request.data;
     return new Promise(function (resolve, reject) {
-      handler.model.create(data, function (err, items) {
+      model.create(data, function (err, items) {
         if (err) {
           reject(err);
         } else {
@@ -60,10 +61,10 @@ Handler.prototype = {
    * @Promise#reslove Array of objects
    */ 
   find: function (request) {
-    var handler = this;
+    var model = this.model;
     var query = Handler.createQueryOption(request.query);
     return new Promise(function (resolve, reject) {
-      handler.model.find(query)
+      model.find(query)
         .exec(function (err, docs) {
           if (err) {
             reject(err);
@@ -80,10 +81,10 @@ Handler.prototype = {
    * @Promise#reslove The Single object or null
    */
   findOne: function (request) {
-    var handler = this;
+    var model = this.model;
     var query = Handler.createQueryOption(request.query);
     return new Promise(function (resolve, reject) {
-      handler.model.findOne(query)
+      model.findOne(query)
         .exec(function (err, doc) {
           if (err) {
             reject(err);
@@ -105,7 +106,7 @@ Handler.prototype = {
    * {success: true}
    */ 
   update: function (request) {
-    var handler = this;
+    var model = this.model;
     var query = Handler.createQueryOption(request.query);
     var data = request.data;
     var multi = request.multi || false;
@@ -113,7 +114,7 @@ Handler.prototype = {
       : UPDATE_METHOD_MULTI;
 
     return new Promise(function (resolve, reject) {
-      handler.model[updateMethodName](query, {
+      model[updateMethodName](query, {
         $set: data
       }, {
         new: true,
@@ -139,10 +140,10 @@ Handler.prototype = {
    * @Promise#reslove {success: true}
    */
   remove: function (request) {
-    var handler = this;
+    var model = this.model;
     var query = Handler.createQueryOption(request.query);
     return new Promise(function (resolve, reject) {
-      handler.model.remove(query)
+      model.remove(query)
         .exec(function (err) {
           if (err) {
             reject(err);
