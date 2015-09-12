@@ -1,6 +1,5 @@
 global.$ = require("../../global");
-var mongoose = require("mongoose");
-var db = mongoose.connect("localhost/electroscope");
+var db = $.rootRequire("config/database");
 var CandidateHandler = require("../handlers/candidate");
 var PartyHandler = require("../handlers/party");
 
@@ -35,5 +34,3 @@ PartyHandler.model.remove(function (err) {
       console.log(err);
     });
 });
-
-

@@ -4,10 +4,8 @@ var favicon = require("serve-favicon");
 var logger = require("morgan");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
-var mongoose = require("mongoose");
-var db = mongoose.connect("localhost/electroscope");
-
 var app = express();
+var db = require("./config/database");
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
@@ -20,12 +18,13 @@ app.use("/", express.static(path.join(__dirname, "public")));
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With"); 
+  next();
 });
 
 // Controller will be here
 var APIControl = require("./controllers/api");
-app.use("/api/v1.0", APIControl);
 app.use("/api/", APIControl);
+app.use("/api/v1.0", APIControl);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -43,7 +42,7 @@ if (app.get("env") === "development") {
     res.status(err.status || 500);
     res.send({
       message: err.message,
-      error: err
+      error: err.stack
     });
   });
 }
@@ -57,6 +56,5 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 module.exports = app;
