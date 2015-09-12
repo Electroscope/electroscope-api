@@ -6,13 +6,12 @@
 
 var expressRouter = require("express").Router;
 
-var Controller = function (name, applicationHandlersPath) {
+function Controller(name, handler) {
   this.router = expressRouter();
   this.name = name;
+  this.handler = handler;
 
   var controller = this;
-  var handler = this.handler = $
-    .rootRequire(applicationHandlersPath + "/" + name); 
   
   this.router.route("/" + name)
     .get(function (req, res, next) {
@@ -52,7 +51,7 @@ var Controller = function (name, applicationHandlersPath) {
 
 Controller.prototype.makeResponse = function(promise, requestModel, res, next) {
   if (promise) {
-    promise(requestModel)
+    promise.call(this.handler, requestModel)
       .then(function (result) { res.json(result) })
       .catch(function (error) { next(error); });
   } else {
