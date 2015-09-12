@@ -14,9 +14,9 @@
 const UPDATE_METHOD_SINGLE = "findOneAndUpdate";
 const UPDATE_METHOD_MULTI = "update";
 
-var Handler = function (model) {
+function Handler(model) {
   this.model = model;
-};
+}
 
 Handler.createQueryOption = function (query) {
   if (query.id) {
@@ -63,12 +63,12 @@ Handler.prototype = {
     var handler = this;
     var query = Handler.createQueryOption(request.query);
     return new Promise(function (resolve, reject) {
-      handler.model.find(query).lean()
+      handler.model.find(query)
         .exec(function (err, docs) {
           if (err) {
             reject(err);
           } else {
-            resolve(docs);
+            resolve(docs.map( doc => doc.toObject()));
           }
         });
     });
@@ -83,12 +83,13 @@ Handler.prototype = {
     var handler = this;
     var query = Handler.createQueryOption(request.query);
     return new Promise(function (resolve, reject) {
-      handler.model.findOne(query).lean()
+      handler.model.findOne(query)
         .exec(function (err, doc) {
           if (err) {
             reject(err);
           } else {
-            resolve(doc || null);
+            doc = doc ? doc.toObject() : null;
+            resolve(doc);
           }
         });
     });
@@ -117,12 +118,13 @@ Handler.prototype = {
       }, {
         new: true,
         multi: multi
-      }).lean().exec(function (err, doc) {
+      }).exec(function (err, doc) {
         if (err) {
           reject(err);
         } else if (multi) {
           resolve({succes: true});
         } else {
+          doc = doc ? doc.toObject() : doc;
           resolve(doc);
         }
       });
