@@ -11,8 +11,8 @@
  * 
  */
 
-const SINGLE_UPDATE_METHOD_NAME = "fundOneAndUpdate";
-const MULTI_UPDATE_METHOD_NAME = "update";
+const UPDATE_METHOD_SINGLE = "findOneAndUpdate";
+const UPDATE_METHOD_MULTI = "update";
 
 var Handler = function (model) {
   this.model = model;
@@ -41,11 +41,14 @@ Handler.prototype = {
     var handler = this;
     var data = request.data;
     return new Promise(function (resolve, reject) {
-      (new handler.model(data)).save(function (err, doc) {
+      handler.model.create(data, function (err, items) {
         if (err) {
           reject(err);
         } else {
-          resolve(doc.toObject());
+          if (items.map) {
+            items = items.map(item => item.toObject());
+          }
+          resolve(items);
         }
       });
     });
@@ -97,15 +100,16 @@ Handler.prototype = {
    * @request.body Data of update path
    * @request.multi [boolean] Multi update of single update
    *
-   * @Promise#reslove Updated object[s]
+   * @Promise#reslove Updated object for single update or
+   * {success: true}
    */ 
   update: function (request) {
     var handler = this;
     var query = Handler.createQueryOption(request.query);
     var data = request.data;
     var multi = request.multi || false;
-    var updateMethodName = !multi ? SINGLE_UPDATE_METHOD_NAME
-      : MULTI_UPDATE_METHOD_NAME;
+    var updateMethodName = !multi ? UPDATE_METHOD_SINGLE
+      : UPDATE_METHOD_MULTI;
 
     return new Promise(function (resolve, reject) {
       handler.model[updateMethodName](query, {
@@ -113,14 +117,15 @@ Handler.prototype = {
       }, {
         new: true,
         multi: multi
-      }).lean()
-        .exec(function (err, doc) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(doc);
-          }
-        });
+      }).lean().exec(function (err, doc) {
+        if (err) {
+          reject(err);
+        } else if (multi) {
+          resolve({succes: true});
+        } else {
+          resolve(doc);
+        }
+      });
     });
   },
   /**
@@ -134,11 +139,9 @@ Handler.prototype = {
   remove: function (request) {
     var handler = this;
     var query = Handler.createQueryOption(request.query);
-    var multi = request.multi || false;
     return new Promise(function (resolve, reject) {
-      handler.model.remove(query, {
-        {multi: multi}
-      }).exec(function (err) {
+      handler.model.remove(query)
+        .exec(function (err) {
           if (err) {
             reject(err);
           } else {

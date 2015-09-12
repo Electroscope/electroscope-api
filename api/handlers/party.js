@@ -8,12 +8,12 @@ PartyHandler.syncWithMaePaySoh = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
     MaePaySohAPI.party.getList()
-      .then(function (parties) {
-        self.create(parties)
-          .then(function (savedPartites) {
-            resolve(savePartites);
-          })
-          .catch(reject);
+      .then(function (data) {
+        self.create({
+          data: data.parties
+        }).then(function (parties) {
+          resolve(parties);
+        }).catch(reject);
       })
       .catch(reject);
   });
