@@ -2,7 +2,10 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 var PartySchema = new Schema({
-}, {strict: false});
+}, {
+  id: true,
+  strict: false
+});
 
 PartySchema.set("toObject", { getters: true });
 
