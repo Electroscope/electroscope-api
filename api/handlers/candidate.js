@@ -17,10 +17,137 @@ CandidateHandler.syncWithMaePaySoh = function () {
       .then(function () {
         console.log(candidates.length 
             + " candidates had been saved");
+        resolve(candidates);
       }).catch(reject);
 
-      resolve(candidates);
     }).catch(reject);
+  });
+};
+
+function groupLengislature(get) {
+  return {
+    _id: "$lengislature",
+    candidates: "$$ROOT"
+  };
+}
+
+CandidateHandler.getLocations = function () {
+  var model = this.model;
+  return new Promise(function (resolve, reject) {
+    model.aggregate([
+      {
+        $group: {
+          _id: {
+            legislature: "$legislature",
+            st_code: "$constituency.ST_PCODE",
+            st_name: "$constituency.parent",
+            dt_code: "$constituency.DT_PCODE",
+            dt_name: "$constituency.name"
+          },
+          constituency: { $push: "$constituency" },
+        }
+      },
+      {
+        $group: {
+          _id: {
+            legislature: "$_id.legislature",
+            st_code: "$_id.st_code",
+            st_name: "$_id.st_name",
+          },
+          districts: {
+            $addToSet: {
+              DT_PCODE: "$_id.dt_code",
+              name: "$_id.dt_name",
+              constituency: "$constituency"
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            legislature: "$_id.legislature",
+          },
+          states: {
+            $addToSet: {
+              ST_PCODE: "$_id.st_code",
+              name: "$_id.st_name",
+              districts: "$districts"
+            }
+          }
+        }
+      }
+    ]).exec(function (err, result) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
+CandidateHandler.groupbyLegislatureStateDistrict = function (query) {
+  var model = this.model;
+  var match = {};
+  
+  if (query.legislature) {
+    match.legislature = query.legislature;
+  }
+  if (query.state){
+    match.state = query.state;
+  }
+  if (query.constituency) {
+    match.constituency = query.constituency;
+  }
+
+  return new Promise(function (resolve, reject) {
+    model.aggregate([{
+      $match: match
+    }, 
+    {
+      $group: {
+        _id: {
+          legislature: "$legislature",
+          state: "$constituency.parent",
+          constituency: "$constituency.name"
+        },
+        candidates: { $push: "$$ROOT" },
+        candidatesCount: { $sum: 1 }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          legislature: "$_id.legislature",
+          state: "$_id.state",
+        },
+        constituencies: {
+          $addToSet: {
+            name: "$_id.constituency",
+            candidates: "$candidates",
+            candiaatesCount: "$candidatesCount"
+          }
+        }
+      }
+    },
+    {
+      $group: {
+        _id: "$_id.legislature",
+        states: {
+          $addToSet: {
+            name: "$_id.state",
+            constituencies: "$constituencies"
+          }
+        }
+      }
+    }]).exec(function (err, result){
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
   });
 };
 
