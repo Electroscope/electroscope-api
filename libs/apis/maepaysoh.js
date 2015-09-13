@@ -107,7 +107,7 @@ MaePaySoh.candidate = {
         if (pagin.current_page < pagin.total_pages) {
           that.getList(pagin.current_page + 1)
             .then(function (data){
-              pipe(data.candidates, data.pagin);
+              pipe(data.candidates);
               nextPage(candidates.concat(data.candidates), 
                   data.pagin);
             })
@@ -141,4 +141,45 @@ MaePaySoh.party = {
     });
   }
 };
+
+MaePaySoh.location = {
+  URL: "geo/district",
+  getList: function (page) {
+    var that = this;
+    return new Promise(function (resolve, reject) {
+      MaePaySoh.getList(that.URL, { page: (page || 1), per_page: 200 })
+        .then(function (data) {
+          resolve({
+            locations: data.data,
+            pagin: data.meta.pagination
+          });
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    });
+  },
+  getAll: function (pipe) {
+    var that = this;
+    return new Promise(function (resolve, reject) {
+      function nextPage(locations, pagin) {
+        if (pagin.current_page < pagin.total_pages) {
+          that.getList(pagin.current_page + 1)
+            .then(function (data){
+              pipe(data.locations);
+              nextPage(locations.concat(data.locations), 
+                  data.pagin);
+            })
+            .catch(function (err) {
+              reject(err);
+            });
+        } else {
+          resolve(locations);
+        }
+      }
+      nextPage([], {current_page: 0, total_pages: 1});
+    });
+  }
+};
+
 module.exports = MaePaySoh;
