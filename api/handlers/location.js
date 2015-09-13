@@ -17,9 +17,9 @@ LocationHandler.syncWithMaePaySoh = function () {
       .then(function () {
         console.log(locations.length 
             + " locations had been saved");
+        resolve(locations);
       }).catch(reject);
 
-      resolve(locations);
     }).catch(reject);
   });
 };

@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var LocationSchema = new Schema({
   geometry: {
     type: { type: String, default: "Polygon", required: true },
-    coordinates: { type: [[Number]] }
+    coordinates: { type: Schema.Types.Mixed }
   }
 }, {
   id: true,
