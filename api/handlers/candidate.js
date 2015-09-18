@@ -24,17 +24,32 @@ CandidateHandler.syncWithMaePaySoh = function () {
   });
 };
 
-function groupLengislature(get) {
-  return {
-    _id: "$lengislature",
-    candidates: "$$ROOT"
-  };
-}
-
-CandidateHandler.getLocations = function () {
+CandidateHandler.getLocations = function (request) {
   var model = this.model;
+  var query = request.query;
+  var $match = {
+    "constituency.ST_PCODE": { $ne: null },
+    "constituency.DT_PCODE": { $ne: null }
+  };
+
+  console.log(query);
+  
+  if (query) {
+    if (query.state)
+      $match.legislature = query.state; 
+
+    if (query.st_pcode)
+      $match["constituency.ST_PCODE"] = query.st_pcode;
+    
+    if (request.dt_pcode)
+      $match["constituency.DT_PCODE"] = query.dt_pcode;
+  }
+   
   return new Promise(function (resolve, reject) {
     model.aggregate([
+      {
+        $match: $match 
+      },
       {
         $group: {
           _id: {
@@ -44,9 +59,10 @@ CandidateHandler.getLocations = function () {
             dt_code: "$constituency.DT_PCODE",
             dt_name: "$constituency.name"
           },
-          constituency: { $push: "$constituency" },
+          candidates: { $sum: 1 },
         }
       },
+      { $sort: {"_id.dt_name": -1}},
       {
         $group: {
           _id: {
@@ -58,16 +74,15 @@ CandidateHandler.getLocations = function () {
             $addToSet: {
               DT_PCODE: "$_id.dt_code",
               name: "$_id.dt_name",
-              constituency: "$constituency"
+              candidates: "$candidates"
             }
           }
         }
       },
+      { $sort: {"_id.st_name": -1}},
       {
         $group: {
-          _id: {
-            legislature: "$_id.legislature",
-          },
+          _id: "$_id.legislature",
           states: {
             $addToSet: {
               ST_PCODE: "$_id.st_code",
@@ -75,6 +90,13 @@ CandidateHandler.getLocations = function () {
               districts: "$districts"
             }
           }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          name: "$_id",
+          states: "$states"
         }
       }
     ]).exec(function (err, result) {

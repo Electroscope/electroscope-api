@@ -5,13 +5,16 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 var PartyHandler = new Handler(PartyModel);
 
 PartyHandler.syncWithMaePaySoh = function () {
-  var self = this;
+  var handler = this;
   return new Promise(function (resolve, reject) {
-    MaePaySohAPI.party.getList()
-      .then(function (data) {
-        self.create({
-          data: data.parties
-        }).then(function (parties) {
+    MaePaySohAPI.party.getAll()
+      .then(function (parties) {
+        handler.create({
+          data: parties
+        }).then(function (data) {
+          parties = data.data;
+          console.log(parties.length
+              + " parties had been saved");
           resolve(parties);
         }).catch(reject);
       })
