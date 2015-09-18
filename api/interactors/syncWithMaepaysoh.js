@@ -15,6 +15,17 @@ function exit() {
   }
 }
 
+var ro = "\\ | / -".split(" ");
+var time = 0;
+setInterval(function () {
+  if (time > 3) {
+    time = 0;
+  }
+  
+  process.stdout.write(ro[time] + "\r");
+  time++;
+}, 100);
+
 function candidateSyncTask() {
   // Start Sync with maepaysoh
   CandidateHandler.model.remove()
@@ -42,9 +53,9 @@ function partySyncTask() {
       console.log("Party collection start syncing");
       return PartyHandler.syncWithMaePaySoh()
         .then(function (parties) {
-          console.log("Party snyc DONE: total of " 
+          console.log("Parties sync DONE: total of " 
               + parties.length
-              +  " parties have been saved");
+              + " parties have been saved");
           exit();
         }).catch(function (err) {
           console.log(err);
@@ -85,5 +96,4 @@ if (args.indexOf("-c") !== -1) {
     tasks.push(locationSyncTask);
   }
 }
-
 tasks.forEach( task => task() );

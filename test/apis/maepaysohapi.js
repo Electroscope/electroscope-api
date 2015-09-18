@@ -18,6 +18,7 @@ describe("MaePaySoh API", function () {
     var totalCandidate;
     describe("#getList()", function(){
       it("should return list of candidate", function(done){
+        this.timeout(4000);
         MaePaySohAPI.candidate.getList()
           .then(function (data){
             totalCandidate = data.pagin.total;

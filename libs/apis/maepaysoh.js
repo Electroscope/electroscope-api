@@ -1,5 +1,4 @@
-var request = require("request");
-
+var request = require("request"); 
 function catchError(callback) {
   return function (err, res, body) {
     if (err) {
@@ -26,7 +25,7 @@ var MaePaySoh = {
   key: "09686031113147cf0e36eac34ababfca1c6874e2",
   // cache token
   _token: "db424d6b-80e7-5f3f-bdab-700d4d689dc0",
-  
+
   getToken: function (force) {
     var that = this;
     return new Promise(function (resolve, reject) {
@@ -46,9 +45,9 @@ var MaePaySoh = {
       }));
     });
   },
-  getOne: function (collectionUrl, id) {
+  getOne: function (URL, id) {
     var that = this;
-    var url = that.host + collectionUrl + "/" + id;
+    var url = that.host + URL + "/" + id;
     return new Promise(function (resolve, reject) {
       request.get({
         url: url,
@@ -62,80 +61,80 @@ var MaePaySoh = {
       }));
     });
   },
-  getList: function (collectionUrl, query) {
+  getList: function (URL, query, page) {
     var that = this;
-    var url = that.host + collectionUrl;
+    URL = that.host + URL;
     query = query || {};
+    query.per_page = 200;
     query.token = that._token;
+    if (page && !isNaN(page)) {
+      query.page = page;
+    }
     return new Promise(function (resolve, reject) {
       request.get({
-        url: url,
+        url: URL,
         qs: query
       }, catchError(function (err, data) {
         if (err) {
           reject(err);
         } else {
-          resolve(data);
+          resolve(data, data.data);
         }
       }));
     });
+  },
+  getAll: function (URL, query, pipe) {
+    var that = this;
+    return new Promise(function (resolve, reject) {
+      function nextPage(prevData, pagin) {
+        pagin = pagin || {current_page: 0, total_pages: 1};
+        if (pagin.current_page < pagin.total_pages) {
+          that.getList(URL, query, pagin.current_page + 1)
+            .then(function(data){
+              if (pipe) pipe(data.data);
+              prevData = prevData.concat(data.data);
+              nextPage(prevData, data.meta.pagination);
+            })
+            .catch(function (err) {
+              reject(err);
+            });
+        } else {
+          resolve(prevData);
+        }
+      }
+      nextPage([]);
+    });
   }
 };
+
 
 MaePaySoh.candidate = {
   DETAIL_URL: "candidate",
   LIST_URL: "candidate/list",
   getList: function (page) {
     var that = this;
-    return new Promise(function (resolve, reject) {
-      MaePaySoh.getList(that.LIST_URL, { page: (page || 1), per_page: 200 })
-        .then(function (data) {
-          resolve({
-            candidates: data.data,
-            pagin: data.meta.pagination
-          });
-        })
-        .catch(function (err) {
-          reject(err);
-        });
-    });
+    return MaePaySoh.getList(that.LIST_URL);
   },
   getAll: function (pipe) {
     var that = this;
-    return new Promise(function (resolve, reject) {
-      function nextPage(candidates, pagin) {
-        if (pagin.current_page < pagin.total_pages) {
-          that.getList(pagin.current_page + 1)
-            .then(function (data){
-              pipe(data.candidates);
-              nextPage(candidates.concat(data.candidates), 
-                  data.pagin);
-            })
-            .catch(function (err) {
-              reject(err);
-            });
-        } else {
-          resolve(candidates);
-        }
-      }
-      nextPage([], {current_page: 0, total_pages: 1});
-    });
+    return MaePaySoh.getAll(that.LIST_URL, {}, pipe)
   }
 };
 
 MaePaySoh.party = {
-  DETAIL_URL: "party/detail",
+  DETAIL_URL: "party",
   LIST_URL: "party",
   getList: function () {
     var that = this;
+    return MaePaySoh.getList(that.LIST_URL);
+  },
+  getAll: function (pipe) {
+    var that = this;
     return new Promise(function (resolve, reject) {
-      MaePaySoh.getList(that.LIST_URL)
-        .then(function (data) { 
-          resolve({
-            parties: data.data
-          });
-        })
-        .catch(function (err) {
+      that.getList()
+        .then(function (parties) {
+          if (pipe) pipe(parties)
+        }).catch(function (err) {
           reject(err);
         });
     });
