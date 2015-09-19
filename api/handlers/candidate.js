@@ -179,19 +179,30 @@ CandidateHandler.groupbyLegislatureStateDistrict = function (query) {
 CandidateHandler.partyCandidateCountByStates = function(query){
   var model = this.model;
   var match = {};
+
+  const LEGISLATURES = {
+    lower_house: "ပြည်သူ့လွှတ်တော်",
+    upper_house: "အမျိုးသားလွှတ်တော်",
+    regional_house: "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်"
+  };
   
   if (query.legislature) {
-    match.legislature = query.legislature;
+    match.legislature = LEGISLATURES[query.legislature];
   }
   if (query.state){
-    match.state = query.state;
+    match["constituency.parent"] = query.state;
   }
-  if (query.constituency) {
-    match.constituency = query.constituency;
+  if (query.st_pcode) {
+    match["constituency.ST_PCODE"] = query.st_pcode;
   }
+
+  console.log("Match", match);
 
   return new Promise(function (resolve, reject) { 
     model.aggregate([
+    {
+      $match: match
+    },
     {
       $group: {
         _id: {
@@ -215,7 +226,7 @@ CandidateHandler.partyCandidateCountByStates = function(query){
     },
     {
       $sort: {
-        candidatesCount: -1
+        st_pcode: -1
       }
     }
     ]).exec(function (err, result){
