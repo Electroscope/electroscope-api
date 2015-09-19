@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "node ./api/interactors/syncWithMaepaysoh.js",
     "start": "nodemon ./bin/www.js",
     "test": "mocha"
   },
