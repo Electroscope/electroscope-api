@@ -3,7 +3,6 @@ var Schema = mongoose.Schema;
 
 var PartySchema = new Schema({
 }, {
-  id: true,
   strict: false
 });
 

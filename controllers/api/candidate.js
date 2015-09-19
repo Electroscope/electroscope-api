@@ -24,4 +24,15 @@ CandidateController.router.get("/candidate-locations", function (req, res, next)
   });
 });
 
+CandidateController.router.get("/candidates/count-by-party", function (req, res, next) {
+  var query = req.query;
+  CandidateHandler.partyCandidateCountByStates({
+    query: query
+  }).then(function (result) {
+    res.send(result);
+  }).catch(function (err) {
+    next(err);
+  });
+});
+
 module.exports = CandidateController.router;

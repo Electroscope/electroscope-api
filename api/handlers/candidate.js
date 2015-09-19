@@ -176,4 +176,56 @@ CandidateHandler.groupbyLegislatureStateDistrict = function (query) {
   });
 };
 
+CandidateHandler.partyCandidateCountByStates = function(query){
+  var model = this.model;
+  var match = {};
+  
+  if (query.legislature) {
+    match.legislature = query.legislature;
+  }
+  if (query.state){
+    match.state = query.state;
+  }
+  if (query.constituency) {
+    match.constituency = query.constituency;
+  }
+
+  return new Promise(function (resolve, reject) { 
+    model.aggregate([
+    {
+      $group: {
+        _id: {
+          legislature: "$legislature",
+          st_pcode: "$constituency.ST_PCODE",
+          state: "$constituency.parent",
+          party_id: "$party_id"
+        },
+        candidatesCount: {$sum: 1}
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        legislature: "$_id.legislature",
+        state: "$_id.state",
+        st_pcode: "$_id.st_pcode",
+        party_number: "$_id.party_id",
+        candidatesCount: "$candidatesCount"
+      }
+    },
+    {
+      $sort: {
+        candidatesCount: -1
+      }
+    }
+    ]).exec(function (err, result){
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
 module.exports = CandidateHandler;
