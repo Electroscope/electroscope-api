@@ -34,4 +34,13 @@ CandidateController.router.get("/candidates/count-by-party", function (req, res,
   });
 });
 
+CandidateController.router.get("/legislatures/:legislature/candidates/count-per-constituency", function (req, res, next) {
+  var query = {legislature: req.params.legislature };
+  CandidateHandler.getCandidateCountPerConstituency(query).then(function (result) {
+    res.send(result);
+  }).catch(function (err) {
+    next(err);
+  });
+});
+
 module.exports = CandidateController.router;

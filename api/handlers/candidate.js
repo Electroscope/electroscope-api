@@ -6,6 +6,11 @@ var CandidateHandler = new Handler(CandidateModel);
 
 CandidateHandler.update = null;
 CandidateHandler.remove = null;
+const LEGISLATURES = {
+  lower_house: "ပြည်သူ့လွှတ်တော်",
+  upper_house: "အမျိုးသားလွှတ်တော်",
+  regional_house: "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်"
+};
 
 CandidateHandler.syncWithMaePaySoh = function () {
   var handler = this;
@@ -36,7 +41,7 @@ CandidateHandler.getLocations = function (request) {
 
   if (query) {
     if (query.legislature)
-      $match.legislature = query.legislature; 
+      $match.legislature = LEGISLATURES[query.legislature]; 
 
     if (query.state)
       $match.state = query.state; 
@@ -98,11 +103,73 @@ CandidateHandler.getLocations = function (request) {
       {
         $project: {
           _id: 0,
+          legislature: "$_id",
           name: "$_id",
           states: "$states"
         }
       }
     ]).exec(function (err, result) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
+CandidateHandler.getCandidateCountPerConstituency = function(query){
+  var model = this.model;
+  var match = {};
+  var firstGrouping = {};
+  match.legislature = LEGISLATURES[query.legislature];
+  if(query.legislature === "lower_house" || query.legislature === "upper_house"){
+    firstGrouping = {
+      _id: {
+        legislature: "$legislature",
+        state: "$constituency.parent",
+        constituency_pcode: "$constituency.TS_PCODE",
+        constituency_name: "$constituency.name",
+        constituency_number: "$constituency.number",
+        constituency_type: "Township"
+      },
+      candidatesCount: {$sum: 1}
+    };
+  }else{
+    firstGrouping = {
+      _id: {
+        legislature: "$legislature",
+        state: "$constituency.parent",
+        constituency_pcode: "$constituency.AM_PCODE",
+        constituency_name: "$constituency.name",
+        constituency_number: "$constituency.number",
+        consituency_type: "Custom"
+      },
+      candidatesCount: {$sum: 1}
+    };
+  }
+  return new Promise(function(resolve, reject){
+    model.aggregate([
+    {
+      $match: match
+    },
+    {
+      $group: firstGrouping
+    },
+    {
+      $project: {
+        _id: 0,
+        legislature: "$_id.legislature",
+        state: "$_id.state",
+        constituency_pcode: "$_id.constituency_pcode",
+        constituency_name: "$_id.constituency_name",
+        constituency_number: "$_id.constituency_number",
+        consituency_type: "$_id.constituency_type",
+        candidates_count: "$candidatesCount"
+
+      }
+    }
+    ]).exec(function (err, result){
       if (err) {
         reject(err);
       } else {
@@ -180,11 +247,6 @@ CandidateHandler.partyCandidateCountByStates = function(query){
   var model = this.model;
   var match = {};
 
-  const LEGISLATURES = {
-    lower_house: "ပြည်သူ့လွှတ်တော်",
-    upper_house: "အမျိုးသားလွှတ်တော်",
-    regional_house: "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်"
-  };
   
   if (query.legislature) {
     match.legislature = LEGISLATURES[query.legislature];
