@@ -8,7 +8,7 @@ CandidateHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
     MaePaySohAPI.candidate.getAll(function (candidates) {
-      console.log(candidates.length + " candidates are got!!")
+      console.log(candidates.length + " candidates are got!!");
     }).then(function (candidates) {
 
       handler.create({
@@ -32,11 +32,12 @@ CandidateHandler.getLocations = function (request) {
     "constituency.DT_PCODE": { $ne: null }
   };
 
-  console.log(query);
-  
   if (query) {
+    if (query.legislature)
+      $match.legislature = query.legislature; 
+
     if (query.state)
-      $match.legislature = query.state; 
+      $match.state = query.state; 
 
     if (query.st_pcode)
       $match["constituency.ST_PCODE"] = query.st_pcode;
