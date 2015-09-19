@@ -4,6 +4,9 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 
 var PartyHandler = new Handler(PartyModel);
 
+PartyHandler.update = null;
+PartyHandler.remove = null;
+
 PartyHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {

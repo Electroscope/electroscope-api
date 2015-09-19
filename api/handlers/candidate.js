@@ -4,6 +4,9 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 
 var CandidateHandler = new Handler(CandidateModel);
 
+CandidateHandler.update = null;
+CandidateHandler.remove = null;
+
 CandidateHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {

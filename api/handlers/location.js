@@ -4,6 +4,9 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 
 var LocationHandler = new Handler(LocationModel);
 
+LocationHandler.update = null;
+LocationHandler.remove = null;
+
 LocationHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
