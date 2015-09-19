@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "node api/interactors/syncWithMaepaysoh",
-    "start": "nodemon ./bin/www.js",
+    "postinstall": "node",
+    "start": "node ./bin/www.js",
     "test": "mocha"
   },
   "dependencies": {
