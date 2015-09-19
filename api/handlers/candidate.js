@@ -13,8 +13,7 @@ CandidateHandler.syncWithMaePaySoh = function () {
 
       handler.create({
         data: candidates
-      })
-      .then(function () {
+      }).then(function () {
         console.log(candidates.length 
             + " candidates had been saved");
         resolve(candidates);

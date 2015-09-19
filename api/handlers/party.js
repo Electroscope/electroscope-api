@@ -7,18 +7,19 @@ var PartyHandler = new Handler(PartyModel);
 PartyHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
-    MaePaySohAPI.party.getAll()
-      .then(function (parties) {
-        handler.create({
-          data: parties
-        }).then(function (data) {
-          parties = data.data;
-          console.log(parties.length
-              + " parties had been saved");
-          resolve(parties);
-        }).catch(reject);
-      })
-      .catch(reject);
+    MaePaySohAPI.party.getAll(function (parties) {
+      console.log(parties.length + " parties are got!!");
+    }).then(function (parties) {
+
+      handler.create({
+        data: parties
+      }).then(function () {
+        console.log(parties.length
+            + " parties had been saved");
+        resolve(parties);
+      }).catch(reject);
+
+    }).catch(reject);
   });
 };
 

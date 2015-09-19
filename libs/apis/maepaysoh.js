@@ -78,7 +78,7 @@ var MaePaySoh = {
         if (err) {
           reject(err);
         } else {
-          resolve(data, data.data);
+          resolve(data);
         }
       }));
     });
@@ -93,7 +93,7 @@ var MaePaySoh = {
             .then(function(data){
               if (pipe) pipe(data.data);
               prevData = prevData.concat(data.data);
-              nextPage(prevData, data.meta.pagination);
+              nextPage(prevData, data.meta && data.meta.pagination || data._meta);
             })
             .catch(function (err) {
               reject(err);
@@ -111,7 +111,7 @@ var MaePaySoh = {
 MaePaySoh.candidate = {
   DETAIL_URL: "candidate",
   LIST_URL: "candidate/list",
-  getList: function (page) {
+  getList: function () {
     var that = this;
     return MaePaySoh.getList(that.LIST_URL);
   },
@@ -130,14 +130,7 @@ MaePaySoh.party = {
   },
   getAll: function (pipe) {
     var that = this;
-    return new Promise(function (resolve, reject) {
-      that.getList()
-        .then(function (parties) {
-          if (pipe) pipe(parties)
-        }).catch(function (err) {
-          reject(err);
-        });
-    });
+    return MaePaySoh.getAll(that.LIST_URL, {}, pipe);
   }
 };
 
