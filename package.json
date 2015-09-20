@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www.js",
-    "test": "mocha"
+    "test": "mocha",
+    "postinstall": "node ./api/interactors/syncWithMaepaysoh.js"
   },
   "dependencies": {
     "body-parser": "~1.13.1",
