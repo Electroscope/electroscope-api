@@ -1,0 +1,618 @@
+var districts = [
+    {
+
+        "name": {
+	    "en": "Wein Kawng (Wein Kao)_Shan Special Region II (Wa)"
+	},
+
+        "code": "MMR015D332"
+    },
+    {
+
+        "name": {
+	    "en": "Mong Maw_Shan Special Region II (Wa)"
+	},
+
+        "code": "MMR015D331"
+    },
+    {
+
+        "name": {
+	    "en": "Mong Pawk_Shan Special Region II (Wa)"
+	},
+
+        "code": "MMR016D333"
+    },
+    {
+
+        "name": {
+	    "en": "Hinthada"
+	},
+
+        "code": "MMR017D002"
+    },
+    {
+
+        "name": {
+	    "en": "Labutta"
+	},
+
+        "code": "MMR017D004"
+    },
+    {
+
+        "name": {
+	    "en": "Maubin"
+	},
+
+        "code": "MMR017D005"
+    },
+    {
+
+        "name": {
+	    "en": "Myaungmya"
+	},
+
+        "code": "MMR017D003"
+    },
+    {
+
+        "name": {
+	    "en": "Pathein"
+	},
+
+        "code": "MMR017D001"
+    },
+    {
+
+        "name": {
+	    "en": "Pyapon"
+	},
+
+        "code": "MMR017D006"
+    },
+    {
+
+        "name": {
+	    "en": "Bago"
+	},
+
+        "code": "MMR007D001"
+    },
+    {
+
+        "name": {
+	    "en": "Taungoo"
+	},
+
+        "code": "MMR007D002"
+    },
+    {
+
+        "name": {
+	    "en": "Pyay"
+	},
+
+        "code": "MMR008D001"
+    },
+    {
+
+        "name": {
+	    "en": "Thayarwady"
+	},
+
+        "code": "MMR008D002"
+    },
+    {
+
+        "name": {
+	    "en": "Falam"
+	},
+
+        "code": "MMR004D001"
+    },
+    {
+
+        "name": {
+	    "en": "Hakha"
+	},
+
+        "code": "MMR004D003"
+    },
+    {
+
+        "name": {
+	    "en": "Mindat"
+	},
+
+        "code": "MMR004D002"
+    },
+    {
+
+        "name": {
+	    "en": "Bhamo"
+	},
+
+        "code": "MMR001D003"
+    },
+    {
+
+        "name": {
+	    "en": "Mohnyin"
+	},
+
+        "code": "MMR001D002"
+    },
+    {
+
+        "name": {
+	    "en": "Myitkyina"
+	},
+
+        "code": "MMR001D001"
+    },
+    {
+
+        "name": {
+	    "en": "Puta-O"
+	},
+
+        "code": "MMR001D004"
+    },
+    {
+
+        "name": {
+	    "en": "Bawlake"
+	},
+
+        "code": "MMR002D002"
+    },
+    {
+
+        "name": {
+	    "en": "Loikaw"
+	},
+
+        "code": "MMR002D001"
+    },
+    {
+
+        "name": {
+	    "en": "Hpa-An"
+	},
+
+        "code": "MMR003D001"
+    },
+    {
+
+        "name": {
+	    "en": "Hpapun"
+	},
+
+        "code": "MMR003D004"
+    },
+    {
+
+        "name": {
+	    "en": "Kawkareik"
+	},
+
+        "code": "MMR003D003"
+    },
+    {
+
+        "name": {
+	    "en": "Myawaddy"
+	},
+
+        "code": "MMR003D002"
+    },
+    {
+
+        "name": {
+	    "en": "Gangaw"
+	},
+
+        "code": "MMR009D005"
+    },
+    {
+
+        "name": {
+	    "en": "Magway"
+	},
+
+        "code": "MMR009D001"
+    },
+    {
+
+        "name": {
+	    "en": "Minbu"
+	},
+
+        "code": "MMR009D002"
+    },
+    {
+
+        "name": {
+	    "en": "Pakokku"
+	},
+
+        "code": "MMR009D004"
+    },
+    {
+
+        "name": {
+	    "en": "Thayet"
+	},
+
+        "code": "MMR009D003"
+    },
+    {
+
+        "name": {
+	    "en": "Kyaukse"
+	},
+
+        "code": "MMR010D003"
+    },
+    {
+
+        "name": {
+	    "en": "Mandalay"
+	},
+
+        "code": "MMR010D001"
+    },
+    {
+
+        "name": {
+	    "en": "Meiktila"
+	},
+
+        "code": "MMR010D007"
+    },
+    {
+
+        "name": {
+	    "en": "Myingyan"
+	},
+
+        "code": "MMR010D004"
+    },
+    {
+
+        "name": {
+	    "en": "Nyaung-U"
+	},
+
+        "code": "MMR010D005"
+    },
+    {
+
+        "name": {
+	    "en": "Pyinoolwin"
+	},
+
+        "code": "MMR010D002"
+    },
+    {
+
+        "name": {
+	    "en": "Yamethin"
+	},
+
+        "code": "MMR010D006"
+    },
+    {
+
+        "name": {
+	    "en": "Mawlamyine"
+	},
+
+        "code": "MMR011D001"
+    },
+    {
+
+        "name": {
+	    "en": "Thaton"
+	},
+
+        "code": "MMR011D002"
+    },
+    {
+
+        "name": {
+	    "en": "Det Khi Na"
+	},
+
+        "code": "MMR018D002"
+    },
+    {
+
+        "name": {
+	    "en": "Oke Ta Ra"
+	},
+
+        "code": "MMR018D001"
+    },
+    {
+
+        "name": {
+	    "en": "Kyaukpyu"
+	},
+
+        "code": "MMR012D003"
+    },
+    {
+
+        "name": {
+	    "en": "Maungdaw"
+	},
+
+        "code": "MMR012D002"
+    },
+    {
+
+        "name": {
+	    "en": "Mrauk-U"
+	},
+
+        "code": "MMR012D005"
+    },
+    {
+
+        "name": {
+	    "en": "Sittwe"
+	},
+
+        "code": "MMR012D001"
+    },
+    {
+
+        "name": {
+	    "en": "Thandwe"
+	},
+
+        "code": "MMR012D004"
+    },
+    {
+
+        "name": {
+	    "en": "Hkamti"
+	},
+
+        "code": "MMR005D008"
+    },
+    {
+
+        "name": {
+	    "en": "Kale"
+	},
+
+        "code": "MMR005D005"
+    },
+    {
+
+        "name": {
+	    "en": "Katha"
+	},
+
+        "code": "MMR005D004"
+    },
+    {
+
+        "name": {
+	    "en": "Mawlaik"
+	},
+
+        "code": "MMR005D007"
+    },
+    {
+
+        "name": {
+	    "en": "Monywa"
+	},
+
+        "code": "MMR005D003"
+    },
+    {
+
+        "name": {
+	    "en": "Sagaing"
+	},
+
+        "code": "MMR005D001"
+    },
+    {
+
+        "name": {
+	    "en": "Shwebo"
+	},
+
+        "code": "MMR005D002"
+    },
+    {
+
+        "name": {
+	    "en": "Tamu"
+	},
+
+        "code": "MMR005D006"
+    },
+    {
+
+        "name": {
+	    "en": "Yinmabin"
+	},
+
+        "code": "MMR005D009"
+    },
+    {
+
+        "name": {
+	    "en": "Kengtung"
+	},
+
+        "code": "MMR016D001"
+    },
+    {
+
+        "name": {
+	    "en": "Monghpyak"
+	},
+
+        "code": "MMR016D004"
+    },
+    {
+
+        "name": {
+	    "en": "Monghsat"
+	},
+
+        "code": "MMR016D002"
+    },
+    {
+
+        "name": {
+	    "en": "Tachileik"
+	},
+
+        "code": "MMR016D003"
+    },
+    {
+
+        "name": {
+	    "en": "Hopang"
+	},
+
+        "code": "MMR015D006"
+    },
+    {
+
+        "name": {
+	    "en": "Kunlong"
+	},
+
+        "code": "MMR015D004"
+    },
+    {
+
+        "name": {
+	    "en": "Kyaukme"
+	},
+
+        "code": "MMR015D003"
+    },
+    {
+
+        "name": {
+	    "en": "Lashio"
+	},
+
+        "code": "MMR015D001"
+    },
+    {
+
+        "name": {
+	    "en": "Laukkaing"
+	},
+
+        "code": "MMR015D005"
+    },
+    {
+
+        "name": {
+	    "en": "Matman"
+	},
+
+        "code": "MMR015D007"
+    },
+    {
+
+        "name": {
+	    "en": "Muse"
+	},
+
+        "code": "MMR015D002"
+    },
+    {
+
+        "name": {
+	    "en": "Langkho"
+	},
+
+        "code": "MMR014D003"
+    },
+    {
+
+        "name": {
+	    "en": "Loilen"
+	},
+
+        "code": "MMR014D002"
+    },
+    {
+
+        "name": {
+	    "en": "Taunggyi"
+	},
+
+        "code": "MMR014D001"
+    },
+    {
+
+        "name": {
+	    "en": "Dawei"
+	},
+
+        "code": "MMR006D001"
+    },
+    {
+
+        "name": {
+	    "en": "Kawthoung"
+	},
+
+        "code": "MMR006D003"
+    },
+    {
+
+        "name": {
+	    "en": "Myeik"
+	},
+
+        "code": "MMR006D002"
+    },
+    {
+
+        "name": {
+	    "en": "Yangon (East)"
+	},
+
+        "code": "MMR013D002"
+    },
+    {
+
+        "name": {
+	    "en": "Yangon (North)"
+	},
+
+        "code": "MMR013D001"
+    },
+    {
+
+        "name": {
+	    "en": "Yangon (South)"
+	},
+
+        "code": "MMR013D003"
+    },
+    {
+
+        "name": {
+	    "en": "Yangon (West)"
+	},
+
+        "code": "MMR013D004"
+    }
+];
