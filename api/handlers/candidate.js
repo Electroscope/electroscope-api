@@ -5,7 +5,7 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 var CandidateHandler = new Handler(CandidateModel);
 
 var mongojs = require("mongojs");
-var db = mongojs('electroscope');
+var db = mongojs('electroscope', ['candidate_records', 'parties']);
 
 CandidateHandler.getCount = function(request) {
     var $match = {};
