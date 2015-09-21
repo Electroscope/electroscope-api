@@ -34,10 +34,11 @@ var parties = require('./parties.json');
 db.collection('parties').insert(parties);
 db.collection('parties').ensureIndex({"location_code": 1});
 
-console.log("Importing Candidate Records ...");
-var candidate_records_2010 = require('./candidate_records_2010.json');
-var candidate_records_2015 = require('./candidate_records_2015.json');
-db.collection('candidate_records').insert(candidate_records_2010);
-db.collection('candidate_records').insert(candidate_records_2015);
+// WHY DOESNT THIS WORK???
+// console.log("Importing Candidate Records ...");
+// var c2010 = require('./candidate_records_2010.json');
+// var c2015 = require('./candidate_records_2015.json');
+// db.collection('candidate_records').insert(c2010);
+// db.collection('candidate_records').insert(c2015);
 
 db.close();
