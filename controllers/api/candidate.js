@@ -3,6 +3,16 @@ var Controller = $.rootRequire("controllers");
 var CandidateHandler = $.rootRequire("api/handlers/candidate");
 var CandidateController = new Controller("candidate", CandidateHandler);
 
+CandidateController.router.get("/candidate-count", function (req, res, next) {
+  var query = req.query;
+  CandidateHandler.getCount(query)
+    .then(function (result) {
+      res.send({data: result});
+    }).catch(function (err) {
+      next(err);
+    });
+});
+
 CandidateController.router.get("/candidate-groupby", function (req, res, next) {
   var query = req.query;
   CandidateHandler.groupbyLegislatureStateDistrict(query)

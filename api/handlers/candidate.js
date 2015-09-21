@@ -4,31 +4,45 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 
 var CandidateHandler = new Handler(CandidateModel);
 
-CandidateHandler.update = null;
-CandidateHandler.remove = null;
-const LEGISLATURES = {
-  lower_house: "ပြည်သူ့လွှတ်တော်",
-  upper_house: "အမျိုးသားလွှတ်တော်",
-  regional_house: "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်"
-};
+var mongojs = require("mongojs");
+var db = mongojs('electroscope', ['candidate_records', 'parties']);
 
-CandidateHandler.syncWithMaePaySoh = function () {
-  var handler = this;
-  return new Promise(function (resolve, reject) {
-    MaePaySohAPI.candidate.getAll(function (candidates) {
-      console.log(candidates.length + " candidates are got!!");
-    }).then(function (candidates) {
+CandidateHandler.getCount = function(request) {
+    var $match = {};
 
-      handler.create({
-        data: candidates
-      }).then(function () {
-        console.log(candidates.length 
-            + " candidates had been saved");
-        resolve(candidates);
-      }).catch(reject);
+    /* if there is no year parameter use 2015 by default */
+    $match.year = 2015;
+    if (request.year) { $match.year = parseInt(request.year); }
 
-    }).catch(reject);
-  });
+    var group_by = 'party';
+    if (request.group_by) { group_by = request.group_by; }
+
+    /* optional parameters */
+    if (request.party) { $match.party = request.party; }
+    if (request.constituency) { $match.constituency = request.constituency; }
+    if (request.parliament) { $match.parliament_code = request.parliament; }
+
+    return new Promise(function (resolve, reject) {
+	var data = [];
+
+	db.candidate_records
+	    .aggregate(
+		[
+		    {$match: $match},
+		    {$group: {_id: '$' + group_by, count: {$sum : 1}}},
+		])
+	    .forEach(
+		function(err, result) {
+		    if (err) { reject(err); }
+
+		    if (!result) {
+			resolve(data);
+			return;
+		    }
+
+		    data.push(result);
+	    });
+    });
 };
 
 CandidateHandler.getLocations = function (request) {
@@ -41,22 +55,22 @@ CandidateHandler.getLocations = function (request) {
 
   if (query) {
     if (query.legislature)
-      $match.legislature = LEGISLATURES[query.legislature]; 
+      $match.legislature = LEGISLATURES[query.legislature];
 
     if (query.state)
-      $match.state = query.state; 
+      $match.state = query.state;
 
     if (query.st_pcode)
       $match["constituency.ST_PCODE"] = query.st_pcode;
-    
+
     if (request.dt_pcode)
       $match["constituency.DT_PCODE"] = query.dt_pcode;
   }
-   
+
   return new Promise(function (resolve, reject) {
     model.aggregate([
       {
-        $match: $match 
+        $match: $match
       },
       {
         $group: {
@@ -182,7 +196,7 @@ CandidateHandler.getCandidateCountPerConstituency = function(query){
 CandidateHandler.groupbyLegislatureStateDistrict = function (query) {
   var model = this.model;
   var match = {};
-  
+
   if (query.legislature) {
     match.legislature = query.legislature;
   }
@@ -196,7 +210,7 @@ CandidateHandler.groupbyLegislatureStateDistrict = function (query) {
   return new Promise(function (resolve, reject) {
     model.aggregate([{
       $match: match
-    }, 
+    },
     {
       $group: {
         _id: {
@@ -247,7 +261,7 @@ CandidateHandler.partyCandidateCountByStates = function(query){
   var model = this.model;
   var match = {};
 
-  
+
   if (query.legislature) {
     match.legislature = LEGISLATURES[query.legislature];
   }
@@ -260,7 +274,7 @@ CandidateHandler.partyCandidateCountByStates = function(query){
 
   console.log("Match", match);
 
-  return new Promise(function (resolve, reject) { 
+  return new Promise(function (resolve, reject) {
     model.aggregate([
     {
       $match: match
