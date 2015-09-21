@@ -20,7 +20,6 @@ PartyHandler.syncWithMaePaySoh = function () {
         party.party_id = party.id;
         return party;
       })
-      console.log("Sample party", parties[0]);
       handler.create({
         data: parties
       }).then(function () {
