@@ -3,6 +3,7 @@ var Handler = $.rootRequire("api/handlers");
 var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 
 var PartyHandler = new Handler(PartyModel);
+var CandidateHandler = $.rootRequire('api/handlers/candidate.js');
 
 PartyHandler.update = null;
 PartyHandler.remove = null;
@@ -19,7 +20,8 @@ PartyHandler.syncWithMaePaySoh = function () {
       parties = parties.map(function(party){
         party.party_id = party.id;
         return party;
-      })
+      });
+
       handler.create({
         data: parties
       }).then(function () {
@@ -34,88 +36,19 @@ PartyHandler.syncWithMaePaySoh = function () {
 
 PartyHandler.getCandidateCounts = function(query){
   /* if there is no year parameter use 2015 by default */
-  var $match = {year: 2015};
+  query.year = query.year || 2015;
+  query.group_by = 'party,parliament_code';
 
-  if (query.year) { $match.year = parseInt(query.year); }
-
-  return new Promise(function (resolve, reject) {
-    db.candidate_records.aggregate([
-      {$match: $match},
-      {
-        $group: {
-          _id: {
-            party: "$party",
-            parliament_code: "$parliament_code"
-          },
-          count: {$sum: 1}
-        }
-      },
-      {
-        $group: {
-          _id: "$_id.party",
-          counts: {
-            $addToSet: {
-              parliament_code: "$_id.parliament_code",
-              count: "$count"
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          party: "$_id",
-          counts: 1
-        }
-      }
-    ], function(err, result) {
-        if (err) { reject(err); }
-        return resolve(result);
-    });
-  });
+  return CandidateHandler.getCount(query);
 };
 
 PartyHandler.getCandidateCountsByParty = function(party, query){
   /* if there is no year parameter use 2015 by default */
-  var $match = {party: party, year: 2015};
+  query.year = query.year || 2015;
+  query.group_by = 'parliament_code';
+  query.party = party;
 
-  if (query.year) { $match.year = parseInt(query.year); }
-
-  return new Promise(function (resolve, reject) {
-    db.candidate_records.aggregate([
-      {$match: $match},
-      {
-        $group: {
-          _id: {
-            party: "$party",
-            parliament_code: "$parliament_code"
-          },
-          count: {$sum: 1}
-        }
-      },
-      {
-        $group: {
-          _id: "$_id.party",
-          counts: {
-            $addToSet: {
-              parliament_code: "$_id.parliament_code",
-              count: "$count"
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          party: "$_id",
-          counts: 1
-        }
-      }
-    ], function(err, result) {
-        if (err) { reject(err); }
-        return resolve(result);
-    });
-  });
+  return CandidateHandler.getCount(query);
 };
 
 module.exports = PartyHandler;
