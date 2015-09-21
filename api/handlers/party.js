@@ -13,7 +13,11 @@ PartyHandler.syncWithMaePaySoh = function () {
     MaePaySohAPI.party.getAll(function (parties) {
       console.log(parties.length + " parties are got!!");
     }).then(function (parties) {
-
+      parties = parties.map(function(party){
+        party.party_id = party.id;
+        return party;
+      })
+      console.log("Sample party", parties[0]);
       handler.create({
         data: parties
       }).then(function () {
