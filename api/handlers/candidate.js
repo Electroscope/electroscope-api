@@ -9,13 +9,21 @@ var db = mongojs('electroscope', ['candidate_records', 'parties']);
 
 CandidateHandler.getCount = function(request) {
     var $match = {};
+    var $group = { _id: {}, count: {$sum : 1}};
 
     /* if there is no year parameter use 2015 by default */
     $match.year = 2015;
     if (request.year) { $match.year = parseInt(request.year); }
 
-    var group_by = 'party';
-    if (request.group_by) { group_by = request.group_by; }
+    var group_by_list = ['party'];
+    if (request.group_by) {
+      group_by_list = request.group_by.split(',');
+    }
+
+    group_by_list.forEach(function (group) {
+      $group._id[group] = '$' + group;
+    });
+    console.log($group);
 
     /* optional parameters */
     if (request.party) { $match.party = request.party; }
@@ -27,7 +35,7 @@ CandidateHandler.getCount = function(request) {
 
     	db.candidate_records.aggregate([
     		    {$match: $match},
-    		    {$group: {_id: '$' + group_by, count: {$sum : 1}}},
+    		    {$group: $group},
     	]).forEach(
     		function(err, result) {
   		    if (err) { reject(err); }
