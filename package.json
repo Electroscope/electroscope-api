@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nodemon ./bin/www.js",
     "test": "mocha",
-    "postinstall": "cd mongoimport && mongo init.js"
+    "postinstall": "cd mongo && node init.js"
   },
   "dependencies": {
     "body-parser": "~1.13.1",
