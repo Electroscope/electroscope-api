@@ -21,4 +21,14 @@ PartyController.router.get("/parties/:party/candidate-count", function (req, res
   });
 });
 
+PartyController.router.get("/parties/:party/gender-count", function (req, res, next) {
+  var query = req.query;
+  var party = req.params.party;
+  PartyHandler.getGenderCountsByParty(party, query).then(function (result) {
+    res.send({data: result});
+  }).catch(function (err) {
+    next(err);
+  });
+});
+
 module.exports = PartyController.router;
