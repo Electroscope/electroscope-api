@@ -23,7 +23,7 @@ CandidateHandler.syncWithMaePaySoh = function () {
       handler.create({
         data: candidates
       }).then(function () {
-        console.log(candidates.length 
+        console.log(candidates.length
             + " candidates had been saved");
         resolve(candidates);
       }).catch(reject);
@@ -46,8 +46,9 @@ CandidateHandler.getCount = function(request) {
   }
 
   group_by_list.forEach(function (each) {
-    $group._id[each] = '$' + each;
+    $group._id[each.replace('.', '_')] = '$' + each;
   });
+  console.info("GROUPBY => ", $group);
 
   /* optional parameters */
   if (request.party) { $match.party = request.party; }
@@ -55,27 +56,31 @@ CandidateHandler.getCount = function(request) {
   if (request.parliament) { $match.parliament_code = request.parliament; }
 
   return new Promise(function (resolve, reject) {
-    db.candidate_records.aggregate(
-      [
-    	{$match: $match},
-    	{$group: $group},
-	{
+    var pipeline = [];
+    pipeline.push({$match: $match});
+    pipeline.push({$group: $group});
+    pipeline.push({
 	  $project: {
 	    _id: 0,
 	    count: 1,
 	    party: "$_id.party",
 	    parliament: "$_id.parliament_code",
-	    constituency: "$_id.constituency"
+	    constituency: "$_id.constituency",
+	    gender: "$_id.candidate_gender"
 	  }
-	}
-      ],
-      function(err, result) {
-    	if (err) {
-    	  reject(err);
-    	} else {
-    	  resolve(result);
-    	}
-      });
+    });
+
+    if (request.$extra_pipeline) {
+      pipeline = pipeline.concat(request.$extra_pipeline);
+    }
+
+    db.candidate_records.aggregate(pipeline, function(err, result) {
+      if (err) {
+    	reject(err);
+      } else {
+    	resolve(result);
+      }
+    });
   });
 };
 

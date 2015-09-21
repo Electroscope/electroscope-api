@@ -37,7 +37,44 @@ PartyHandler.syncWithMaePaySoh = function () {
 PartyHandler.getCandidateCounts = function(query){
   /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
-  query.group_by = 'party,parliament_code';
+  query.group_by = 'party,parliament_code'; // 'party'
+  query.$extra_pipeline = [
+    { $group: {
+      _id: '$party',
+      parliament_counts: {$addToSet: {count: "$count", parliament: '$parliament'}},
+      total_count: {$sum: '$count'}
+    }},
+    { $project: {
+      party: '$_id',
+      _id: 0,
+      parliament_counts: 1,
+      total_count: 1
+    }}
+  ];
+
+  return CandidateHandler.getCount(query);
+};
+
+PartyHandler.getGenderCountsByParty = function(party, query){
+  /* Support only 2015 right now */
+  query.year = 2015;
+  query.group_by = 'party,candidate.gender';
+  query.party = party;
+
+  query.$extra_pipeline = [
+    { $match: {gender: {$in : [ 'M', 'F']}} } ,
+    { $group: {
+      _id: '$party',
+      gender_counts: {$addToSet: {count: "$count", gender: '$gender'}},
+      total_count: {$sum: '$count'}
+    }},
+    { $project: {
+      party: '$_id',
+      _id: 0,
+      gender_counts: 1,
+      total_count: 1
+    }}
+  ];
 
   return CandidateHandler.getCount(query);
 };
