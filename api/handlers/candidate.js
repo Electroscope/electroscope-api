@@ -8,64 +8,50 @@ var mongojs = require("mongojs");
 var db = mongojs('electroscope', ['candidate_records', 'parties']);
 
 CandidateHandler.getCount = function(request) {
-    var $match = {};
-    var $group = { _id: {}, count: {$sum : 1}};
+  var $match = {};
+  var $group = { _id: {}, count: {$sum : 1}};
 
-    /* if there is no year parameter use 2015 by default */
-    $match.year = 2015;
-    if (request.year) { $match.year = parseInt(request.year); }
+  /* if there is no year parameter use 2015 by default */
+  $match.year = 2015;
+  if (request.year) { $match.year = parseInt(request.year); }
 
-    console.log($group);
+  var group_by_list = ['party'];
+  if (request.group_by) {
+    group_by_list = request.group_by.split(',');
+  }
 
-    /* optional parameters */
-    if (request.party) { $match.party = request.party; }
-    if (request.constituency) { $match.constituency = request.constituency; }
-    if (request.parliament) { $match.parliament_code = request.parliament; }
+  group_by_list.forEach(function (each) {
+    $group._id[each] = '$' + each;
+  });
 
-    return new Promise(function (resolve, reject) {
-    	var data = [];
+  /* optional parameters */
+  if (request.party) { $match.party = request.party; }
+  if (request.constituency) { $match.constituency = request.constituency; }
+  if (request.parliament) { $match.parliament_code = request.parliament; }
 
-    	db.candidate_records.aggregate([
-		    {$match: $match},
-		    {
-          $group: {
-            _id: {
-              party: "$party",
-              parliament_code: "$parliament_code"
-            },
-            count: {$sum: 1}
-          }
-        },
-        {
-          $group: {
-            _id: "$_id.party",
-            counts: {
-              $addToSet: {
-                parliament_code: "$_id.parliament_code",
-                count: "$count"
-              }
-            }
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            party: "$_id",
-            counts: 1
-          }
-        }
-    	]).forEach(
-    		function(err, result) {
-  		    if (err) { reject(err); }
-
-  		    if (!result) {
-    			resolve(data);
-    			return;
-    		}
-
-		    data.push(result);
-	    });
-    });
+  return new Promise(function (resolve, reject) {
+    db.candidate_records.aggregate(
+      [
+    	{$match: $match},
+    	{$group: $group},
+	{
+	  $project: {
+	    _id: 0,
+	    count: 1,
+	    party: "$_id.party",
+	    parliament: "$_id.parliament_code",
+	    constituency: "$_id.constituency"
+	  }
+	}
+      ],
+      function(err, result) {
+    	if (err) {
+    	  reject(err);
+    	} else {
+    	  resolve(result);
+    	}
+      });
+  });
 };
 
 CandidateHandler.getLocations = function (request) {
