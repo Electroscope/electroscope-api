@@ -15,14 +15,6 @@ CandidateHandler.getCount = function(request) {
     $match.year = 2015;
     if (request.year) { $match.year = parseInt(request.year); }
 
-    var group_by_list = ['party'];
-    if (request.group_by) {
-      group_by_list = request.group_by.split(',');
-    }
-
-    group_by_list.forEach(function (group) {
-      $group._id[group] = '$' + group;
-    });
     console.log($group);
 
     /* optional parameters */
@@ -34,8 +26,34 @@ CandidateHandler.getCount = function(request) {
     	var data = [];
 
     	db.candidate_records.aggregate([
-    		    {$match: $match},
-    		    {$group: $group},
+		    {$match: $match},
+		    {
+          $group: {
+            _id: {
+              party: "$party",
+              parliament_code: "$parliament_code"
+            },
+            count: {$sum: 1}
+          }
+        },
+        {
+          $group: {
+            _id: "$_id.party",
+            counts: {
+              $addToSet: {
+                parliament_code: "$_id.parliament_code",
+                count: "$count"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            party: "$_id",
+            counts: 1
+          }
+        }
     	]).forEach(
     		function(err, result) {
   		    if (err) { reject(err); }
