@@ -5,7 +5,7 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 var CandidateHandler = new Handler(CandidateModel);
 
 var mongojs = require("mongojs");
-var db = mongojs('electroscope', ['candidate_records', 'parties']);
+var db = mongojs('electroscope');
 
 CandidateHandler.getCount = function(request) {
     var $match = {};
@@ -23,22 +23,19 @@ CandidateHandler.getCount = function(request) {
     if (request.parliament) { $match.parliament_code = request.parliament; }
 
     return new Promise(function (resolve, reject) {
-	var data = [];
+    	var data = [];
 
-	db.candidate_records
-	    .aggregate(
-		[
-		    {$match: $match},
-		    {$group: {_id: '$' + group_by, count: {$sum : 1}}},
-		])
-	    .forEach(
-		function(err, result) {
-		    if (err) { reject(err); }
+    	db.candidate_records.aggregate([
+    		    {$match: $match},
+    		    {$group: {_id: '$' + group_by, count: {$sum : 1}}},
+    	]).forEach(
+    		function(err, result) {
+  		    if (err) { reject(err); }
 
-		    if (!result) {
-			resolve(data);
-			return;
-		    }
+  		    if (!result) {
+    			resolve(data);
+    			return;
+    		}
 
 		    data.push(result);
 	    });
