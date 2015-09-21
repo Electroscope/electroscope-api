@@ -7,6 +7,13 @@ var CandidateHandler = new Handler(CandidateModel);
 var mongojs = require("mongojs");
 var db = mongojs('electroscope', ['candidate_records', 'parties']);
 
+const LEGISLATURES = {
+  lower_house: "ပြည်သူ့လွှတ်တော်",
+  upper_house: "အမျိုးသားလွှတ်တော်",
+  regional_house: "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်"
+};
+
+
 CandidateHandler.getCount = function(request) {
   var $match = {};
   var $group = { _id: {}, count: {$sum : 1}};
