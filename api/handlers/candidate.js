@@ -13,6 +13,25 @@ const LEGISLATURES = {
   regional_house: "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်"
 };
 
+CandidateHandler.syncWithMaePaySoh = function () {
+  var handler = this;
+  return new Promise(function (resolve, reject) {
+    MaePaySohAPI.candidate.getAll(function (candidates) {
+      console.log(candidates.length + " candidates are got!!");
+    }).then(function (candidates) {
+
+      handler.create({
+        data: candidates
+      }).then(function () {
+        console.log(candidates.length 
+            + " candidates had been saved");
+        resolve(candidates);
+      }).catch(reject);
+
+    }).catch(reject);
+  });
+};
+
 
 CandidateHandler.getCount = function(request) {
   var $match = {};
