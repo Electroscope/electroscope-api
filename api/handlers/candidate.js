@@ -10,7 +10,6 @@ var db = mongojs('electroscope', ['candidate_records', 'parties']);
 CandidateHandler.getCount = function(request) {
   var $match = {};
   var $group = { _id: {}, count: {$sum : 1}};
-
   /* if there is no year parameter use 2015 by default */
   $match.year = 2015;
   if (request.year) { $match.year = parseInt(request.year); }
