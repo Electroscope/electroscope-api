@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nodemon ./bin/www.js",
     "test": "mocha",
-      "postinstall": "node ./api/interactors/syncWithMaepaysoh && cd mongo && node init.js && mongoimport --drop --jsonArray --host=127.0.0.1 -d electroscope -c candidate_records candidate_records_2010.json && mongoimport --jsonArray --host=127.0.0.1 -d electroscope -c candidate_records candidate_records_2015.json"
+      "postinstall": "node ./api/interactors/syncWithMaepaysoh && cd mongo && node init.js"
   },
   "dependencies": {
     "body-parser": "~1.13.1",
