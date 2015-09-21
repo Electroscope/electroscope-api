@@ -2,7 +2,12 @@
 
 var mongojs = require("mongojs");
 var db = mongojs('localhost/electroscope');
-db.dropDatabase();
+db.collection('states').drop();
+db.collection('districts').drop();
+db.collection('townships').drop();
+db.collection('population').drop();
+db.collection('parliaments').drop();
+db.collection('party_records').drop();
 
 console.log("Importing States ...");
 var states = require('./states.json');
@@ -31,8 +36,8 @@ db.collection('parliaments').ensureIndex({"code": 1});
 
 console.log("Importing Parties ...");
 var parties = require('./parties.json');
-db.collection('parties').insert(parties);
-db.collection('parties').ensureIndex({"location_code": 1});
+db.collection('party_records').insert(parties);
+db.collection('party_records').ensureIndex({"location_code": 1});
 
 // WHY DOESNT THIS WORK???
 // console.log("Importing Candidate Records ...");

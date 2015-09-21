@@ -8,7 +8,7 @@ PartyHandler.update = null;
 PartyHandler.remove = null;
 
 var mongojs = require("mongojs");
-var db = mongojs('electroscope', ['candidate_records', 'parties']);
+var db = mongojs('electroscope', ['candidate_records', 'party_records']);
 
 PartyHandler.syncWithMaePaySoh = function () {
   var handler = this;

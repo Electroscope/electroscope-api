@@ -5,7 +5,7 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 var CandidateHandler = new Handler(CandidateModel);
 
 var mongojs = require("mongojs");
-var db = mongojs('electroscope', ['candidate_records', 'parties']);
+var db = mongojs('electroscope', ['candidate_records', 'party_records']);
 
 const LEGISLATURES = {
   lower_house: "ပြည်သူ့လွှတ်တော်",
