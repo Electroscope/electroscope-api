@@ -7,6 +7,9 @@ var PartyHandler = new Handler(PartyModel);
 PartyHandler.update = null;
 PartyHandler.remove = null;
 
+var mongojs = require("mongojs");
+var db = mongojs('electroscope', ['candidate_records', 'parties']);
+
 PartyHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
@@ -27,6 +30,49 @@ PartyHandler.syncWithMaePaySoh = function () {
       }).catch(reject);
 
     }).catch(reject);
+  });
+};
+
+PartyHandler.getCandidateCounts = function(query){
+  /* if there is no year parameter use 2015 by default */
+  var $match = {year: 2015};
+
+  if (query.year) { $match.year = parseInt(query.year); }
+
+  return new Promise(function (resolve, reject) {
+    db.candidate_records.aggregate([
+      {$match: $match},
+      {
+        $group: {
+          _id: {
+            party: "$party",
+            parliament_code: "$parliament_code"
+          },
+          count: {$sum: 1}
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.party",
+          counts: {
+            $addToSet: {
+              parliament_code: "$_id.parliament_code",
+              count: "$count"
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          party: "$_id",
+          counts: 1
+        }
+      }
+    ], function(err, result) {
+        if (err) { reject(err); }
+        return resolve(result);
+    });
   });
 };
 
