@@ -9,8 +9,8 @@ Electroscope API
   `year` => 2010 or 2015
 ```
 
-* http://localhost:3000/api/parties/:party-code/candidate-count (particpating candidate group by parliaments for all parties)
-````
+* http://localhost:3000/api/parties/:party-code/candidate-count (particpating candidate group by parliaments for each party)
+```
   *Params*
   `year` => 2010 or 2015
   `party-code` => grep 'code' mongo/parties.json  (for example NLFD for NLD)
@@ -24,7 +24,7 @@ Electroscope API
   `party-code` => grep 'code' mongo/parties.json  (for example NLFD for NLD)
 ```
 
-* http://localhost:3000/api/candidate-count?year=2015&group_by=party,parliament_code (genderal allpurpose candidate-count, not recommended to use, will all wrapper)
+* http://localhost:3000/api/candidate-count?year=2015&group_by=party,parliament_code [ General allpurpose candidate-count]
 ```
   *Params*
   `year` => 2010 or 2015
@@ -33,23 +33,22 @@ Electroscope API
   `parliament` => parliament code (grep parliment_code mongo/candidate_records_201?.json)
   `group_by` => party and/or parliament_code and/or constituency
 		technially any field in `candidate_records`
-
-  http://localhost:3000/api/candidate-count?year=2015&group_by=candidate.gender,parliament_code
+   http://localhost:3000/api/candidate-count?year=2015&group_by=candidate.gender,parliament_code
 ```
 
-## Pre-require
+## Pre-require ##
 
 - nodejs
 - mongoDB
 
-## Developement Run
+## Developement Run ##
 
 ```bash
 npm install
 npm start
 ```
 
-## Test
+## Test ##
 
 ```bash
 npm test
