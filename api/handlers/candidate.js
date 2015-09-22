@@ -7,12 +7,6 @@ var CandidateHandler = new Handler(CandidateModel);
 var mongojs = require("mongojs");
 var db = mongojs('electroscope', ['candidate_records', 'party_records']);
 
-const LEGISLATURES = {
-  lower_house: "ပြည်သူ့လွှတ်တော်",
-  upper_house: "အမျိုးသားလွှတ်တော်",
-  regional_house: "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်"
-};
-
 CandidateHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
@@ -31,7 +25,6 @@ CandidateHandler.syncWithMaePaySoh = function () {
     }).catch(reject);
   });
 };
-
 
 CandidateHandler.getCount = function(request) {
   var $match = {};
@@ -53,7 +46,7 @@ CandidateHandler.getCount = function(request) {
   /* optional parameters */
   if (request.party) { $match.party = request.party; }
   if (request.constituency) { $match.constituency = request.constituency; }
-  if (request.parliament) { $match.parliament_code = request.parliament; }
+  if (request.parliament) { $match.parliament = request.parliament; }
 
   return new Promise(function (resolve, reject) {
     var pipeline = [];
@@ -64,7 +57,7 @@ CandidateHandler.getCount = function(request) {
 	    _id: 0,
 	    count: 1,
 	    party: "$_id.party",
-	    parliament: "$_id.parliament_code",
+	    parliament: "$_id.parliament",
 	    constituency: "$_id.constituency",
 	    gender: "$_id.candidate_gender"
 	  }
@@ -84,274 +77,63 @@ CandidateHandler.getCount = function(request) {
   });
 };
 
-CandidateHandler.getLocations = function (request) {
-  var model = this.model;
-  var query = request.query;
-  var $match = {
-    "constituency.ST_PCODE": { $ne: null },
-    "constituency.DT_PCODE": { $ne: null }
+CandidateHandler.getGenderCount = function(query){
+  /* Support only 2015 right now */
+  query.year = 2015;
+  var group_by = query.group_by;
+  query.group_by = group_by ?  group_by + ',candidate.gender': 'candidate.gender';
+
+  var $group = {
+    _id: null,
+    gender_counts: {$addToSet: {count: "$count", gender: '$gender'}},
+    total_count: {$sum: '$count'}
   };
 
-  if (query) {
-    if (query.legislature)
-      $match.legislature = LEGISLATURES[query.legislature];
+  var $project =  {
+    _id: 0,
+    gender_counts: 1,
+    total_count: 1
+  };
 
-    if (query.state)
-      $match.state = query.state;
-
-    if (query.st_pcode)
-      $match["constituency.ST_PCODE"] = query.st_pcode;
-
-    if (request.dt_pcode)
-      $match["constituency.DT_PCODE"] = query.dt_pcode;
+  if (group_by) {
+    $project[group_by] = "$_id";
+    $group._id = '$' + group_by;
   }
 
-  return new Promise(function (resolve, reject) {
-    model.aggregate([
-      {
-        $match: $match
-      },
-      {
-        $group: {
-          _id: {
-            legislature: "$legislature",
-            st_code: "$constituency.ST_PCODE",
-            st_name: "$constituency.parent",
-            dt_code: "$constituency.DT_PCODE",
-            dt_name: "$constituency.name"
-          },
-          candidates: { $sum: 1 },
-        }
-      },
-      { $sort: {"_id.dt_name": -1}},
-      {
-        $group: {
-          _id: {
-            legislature: "$_id.legislature",
-            st_code: "$_id.st_code",
-            st_name: "$_id.st_name",
-          },
-          districts: {
-            $addToSet: {
-              DT_PCODE: "$_id.dt_code",
-              name: "$_id.dt_name",
-              candidates: "$candidates"
-            }
-          }
-        }
-      },
-      { $sort: {"_id.st_name": -1}},
-      {
-        $group: {
-          _id: "$_id.legislature",
-          states: {
-            $addToSet: {
-              ST_PCODE: "$_id.st_code",
-              name: "$_id.st_name",
-              districts: "$districts"
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          legislature: "$_id",
-          name: "$_id",
-          states: "$states"
-        }
-      }
-    ]).exec(function (err, result) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
+  query.$extra_pipeline = [
+    { $match: {gender: {$in : [ 'M', 'F']}} } ,
+    { $group: $group},
+    { $project: $project}
+  ];
+
+  return CandidateHandler.getCount(query);
 };
 
-CandidateHandler.getCandidateCountPerConstituency = function(query){
-  var model = this.model;
-  var match = {};
-  var firstGrouping = {};
-  match.legislature = LEGISLATURES[query.legislature];
-  if(query.legislature === "lower_house" || query.legislature === "upper_house"){
-    firstGrouping = {
-      _id: {
-        legislature: "$legislature",
-        state: "$constituency.parent",
-        constituency_pcode: "$constituency.TS_PCODE",
-        constituency_name: "$constituency.name",
-        constituency_number: "$constituency.number",
-        constituency_type: "Township"
-      },
-      candidatesCount: {$sum: 1}
+CandidateHandler.getPartyCount = function (query) {
+    /* if there is no year parameter use 2015 by default */
+  query.year = query.year || 2015;
+  var group_by = query.group_by;
+  query.group_by = 'party,parliament'; // 'party'
+
+  var $group = {
+      _id: '$party',
+      parliament_counts: {$addToSet: {count: "$count", parliament: '$parliament'}},
+      total_count: {$sum: '$count'}
     };
-  }else{
-    firstGrouping = {
-      _id: {
-        legislature: "$legislature",
-        state: "$constituency.parent",
-        constituency_pcode: "$constituency.AM_PCODE",
-        constituency_name: "$constituency.name",
-        constituency_number: "$constituency.number",
-        consituency_type: "Custom"
-      },
-      candidatesCount: {$sum: 1}
+
+  var $project = {
+      party: '$_id',
+      _id: 0,
+      parliament_counts: 1,
+      total_count: 1
     };
-  }
-  return new Promise(function(resolve, reject){
-    model.aggregate([
-    {
-      $match: match
-    },
-    {
-      $group: firstGrouping
-    },
-    {
-      $project: {
-        _id: 0,
-        legislature: "$_id.legislature",
-        state: "$_id.state",
-        constituency_pcode: "$_id.constituency_pcode",
-        constituency_name: "$_id.constituency_name",
-        constituency_number: "$_id.constituency_number",
-        consituency_type: "$_id.constituency_type",
-        candidates_count: "$candidatesCount"
 
-      }
-    }
-    ]).exec(function (err, result){
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-};
+  query.$extra_pipeline = [
+    { $group: $group},
+    { $project: $project}
+  ];
 
-CandidateHandler.groupbyLegislatureStateDistrict = function (query) {
-  var model = this.model;
-  var match = {};
-
-  if (query.legislature) {
-    match.legislature = query.legislature;
-  }
-  if (query.state){
-    match.state = query.state;
-  }
-  if (query.constituency) {
-    match.constituency = query.constituency;
-  }
-
-  return new Promise(function (resolve, reject) {
-    model.aggregate([{
-      $match: match
-    },
-    {
-      $group: {
-        _id: {
-          legislature: "$legislature",
-          state: "$constituency.parent",
-          constituency: "$constituency.name"
-        },
-        candidates: { $push: "$$ROOT" },
-        candidatesCount: { $sum: 1 }
-      }
-    },
-    {
-      $group: {
-        _id: {
-          legislature: "$_id.legislature",
-          state: "$_id.state",
-        },
-        constituencies: {
-          $addToSet: {
-            name: "$_id.constituency",
-            candidates: "$candidates",
-            candiaatesCount: "$candidatesCount"
-          }
-        }
-      }
-    },
-    {
-      $group: {
-        _id: "$_id.legislature",
-        states: {
-          $addToSet: {
-            name: "$_id.state",
-            constituencies: "$constituencies"
-          }
-        }
-      }
-    }]).exec(function (err, result){
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-};
-
-CandidateHandler.partyCandidateCountByStates = function(query){
-  var model = this.model;
-  var match = {};
-
-
-  if (query.legislature) {
-    match.legislature = LEGISLATURES[query.legislature];
-  }
-  if (query.state){
-    match["constituency.parent"] = query.state;
-  }
-  if (query.st_pcode) {
-    match["constituency.ST_PCODE"] = query.st_pcode;
-  }
-
-  console.log("Match", match);
-
-  return new Promise(function (resolve, reject) {
-    model.aggregate([
-    {
-      $match: match
-    },
-    {
-      $group: {
-        _id: {
-          legislature: "$legislature",
-          st_pcode: "$constituency.ST_PCODE",
-          state: "$constituency.parent",
-          party_id: "$party_id"
-        },
-        candidatesCount: {$sum: 1}
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        legislature: "$_id.legislature",
-        state: "$_id.state",
-        st_pcode: "$_id.st_pcode",
-        party_number: "$_id.party_id",
-        candidatesCount: "$candidatesCount"
-      }
-    },
-    {
-      $sort: {
-        st_pcode: -1
-      }
-    }
-    ]).exec(function (err, result){
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
+  return CandidateHandler.getCount(query);
 };
 
 module.exports = CandidateHandler;
