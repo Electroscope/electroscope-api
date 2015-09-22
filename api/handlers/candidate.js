@@ -59,7 +59,8 @@ CandidateHandler.getCount = function(request) {
 	    party: "$_id.party",
 	    parliament: "$_id.parliament",
 	    constituency: "$_id.constituency",
-	    gender: "$_id.candidate_gender"
+	    gender: "$_id.candidate_gender",
+	    ethnicity: "$_id.candidate_ethnicity"
 	  }
     });
 
@@ -77,7 +78,7 @@ CandidateHandler.getCount = function(request) {
   });
 };
 
-CandidateHandler.getGenderCount = function(query){
+CandidateHandler.getByGenderCount = function(query){
   /* Support only 2015 right now */
   query.year = 2015;
   var group_by = query.group_by;
@@ -109,7 +110,7 @@ CandidateHandler.getGenderCount = function(query){
   return CandidateHandler.getCount(query);
 };
 
-CandidateHandler.getPartyCount = function (query) {
+CandidateHandler.getByPartyCount = function (query) {
     /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
   var group_by = query.group_by;
@@ -127,6 +128,36 @@ CandidateHandler.getPartyCount = function (query) {
       parliament_counts: 1,
       total_count: 1
     };
+
+  query.$extra_pipeline = [
+    { $group: $group},
+    { $project: $project}
+  ];
+
+  return CandidateHandler.getCount(query);
+};
+
+CandidateHandler.getByEthnicityCount = function (query) {
+  query.year = 2015;
+  var group_by = query.group_by;
+  query.group_by = group_by ?  group_by + ',candidate.ethnicity': 'candidate.ethnicity';
+
+  var $group = {
+    _id: null,
+    ethnicity_counts: {$addToSet: {count: "$count", ethnicity: '$ethnicity'}},
+    total_count: {$sum: '$count'}
+  };
+
+  var $project =  {
+    _id: 0,
+    ethnicity_counts: 1,
+    total_count: 1
+  };
+
+  if (group_by) {
+    $project[group_by] = "$_id";
+    $group._id = '$' + group_by;
+  }
 
   query.$extra_pipeline = [
     { $group: $group},
