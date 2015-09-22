@@ -36,6 +36,7 @@ Electroscope API
 ### By Ethnicity ###
 * return (candidate) ethnicity count for each parliment or party
 *  url => http://localhost:3000/api/candidates/count/by-ethnicity?group_by=party
+
 ```
   Params
   ------
@@ -49,6 +50,7 @@ Electroscope API
 ### By Agegroup ###
 * return (candidate) agegroup ranges for each parliment or party
 *  url => http://localhost:3000/api/candidates/count/by-agegroup?year=2015&group_by=party
+
 ```
   Params
   ------
