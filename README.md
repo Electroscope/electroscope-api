@@ -1,7 +1,32 @@
 Electroscope API
 ================
 
-The most incredible Myanmar election data center power by apalar peoples.
+## Endpoints ##
+
+* http://localhost:3000/api/parties/candidate-count?year=2010 (particpating candidate group by parliaments for all parties)
+  *Params*
+  `year` => 2010 or 2015
+
+* http://localhost:3000/api/parties/:party-code/candidate-count (particpating candidate group by parliaments for all parties)
+  *Params*
+  `year` => 2010 or 2015
+  `party-code` => grep 'code' mongo/parties.json  (for example NLFD for NLD)
+
+* http://localhost:3000/api/parties/:party-code/gender-count (male female counts for each parties)
+  *Params*
+  `year` => only 2010
+  `party-code` => grep 'code' mongo/parties.json  (for example NLFD for NLD)
+
+* http://localhost:3000/api/candidate-count?year=2015&group_by=party,parliament_code (genderal allpurpose candidate-count, not recommended to use, will all wrapper)
+  *Params*
+  `year` => 2010 or 2015
+  `party` => party code (grep 'code' mongo/parties.json)
+  `constituency` => constituency code (grep constituency mongo/candidate_records_201?.json)
+  `parliament` => parliament code (grep parliment_code mongo/candidate_records_201?.json)
+  `group_by` => party and/or parliament_code and/or constituency
+		technially any field in `candidate_records`
+
+  http://localhost:3000/api/candidate-count?year=2015&group_by=candidate.gender,parliament_code
 
 ## Pre-require
 
@@ -20,112 +45,3 @@ npm start
 ```bash
 npm test
 ```
-
-## Structure
-
-- All Application business rules are in `api` folder and 
-they should seperate to web delivery mechanism
-- Controllers are construct on Express Router and
-it export web delivery system, connect between applicaiton's
-handlers
-- I just like make test for business rules only
-
-## Basic API end-points system
-
-The end-point system is base on *REST API* model.  
-The allowence `Content-Type` are `x-www-form-urlencoded` and `application/json`.  
-Current API don't have any Authonication.
-
-### Create an item
-`POST: [host]/api/[collection-name]`
-
-*BODY*
-```
-{
-  "name": "U Aung Aung",
-  "age": 38,
-  "party_id": 10001,
-}
-```
-
-for multi create request, send an Array or items.
-
-```
-[
-  {
-    "name": "U Aung Aung",
-    "age": 38,
-    "party_id": 10001,
-  },{
-    "name": "U Aung Aung",
-    "age": 38,
-    "party_id": 10001,
-  }
-]
-```
-
-*RESULT MODEL*
-
-The result will be created object[s]
-
-### Get List of items
-`GET: [host]/api/[collection-name]`
-
-*RESULT MODEL*
-
-```
-{
-  "data": [{item-1}, {item-2}]
-}
-```
-
-TODO: We have no pagin currently
-
-### Get item detail
-`GET: [host]/api/[collection-name]/[item-id]`
-
-*RESULT MODEL*
-
-```
-{
-  "data": {item-data}
-}
-```
-
-### Search item
-`GET: [host]/api/[collection-name]?[query]`
-
-*QUERY*
-
-`?name=Aung%20Aung`
-
-*RESULT MODEL*
-
-This will be same as *list request*
-
-### Update item
-`PUT: [host]/api/[collection-name]/[item-id]`
-
-*BODY*
-```
-{
-  "name": "U Aung Aung",
-  "age": 38,
-  "party_id": 10001,
-}
-```
-
-Unlike *Create Request* update don't support multipal update
-
-
-*RESULT MODEL*
-
-The result will be updated object[s]
-
-### Delete item
-`DELETE: [host]/api/[collection-name]/[item-id]`
-
-*SUCCESS RESULT*
-
-`{ "success": true }`
-
