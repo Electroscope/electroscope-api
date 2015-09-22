@@ -1,39 +1,51 @@
 Electroscope API
 ================
 
-## Endpoints ##
+## Endpoints ###
 
-* http://localhost:3000/api/parties/candidate-count?year=2010 (particpating candidate group by parliaments for all parties)
-```
-  *Params*
-  `year` => 2010 or 2015
-```
+### Candidate Count ###
 
-* http://localhost:3000/api/parties/:party-code/candidate-count (particpating candidate group by parliaments for each party)
-```
-  *Params*
-  `year` => 2010 or 2015
-  `party-code` => grep 'code' mongo/parties.json  (for example NLFD for NLD)
-```
+* By Gender [return M or F count for each party or parliament]
+  url => http://localhost:3000/api/candidates/count/by-gender?year=2015&group_by=parliment
 
-
-* http://localhost:3000/api/parties/:party-code/gender-count (male female counts for each parties)
 ```
-  *Params*
-  `year` => only 2010
-  `party-code` => grep 'code' mongo/parties.json  (for example NLFD for NLD)
+  Params
+  ------
+  group_by => either 'party' or 'parliament'
+  year => only support 2015 right now
+  party => show only for party
+  	   [grep 'code' mongo/parties.json]
+  constituency => show only for constituency
+  	       [grep 'constituency' mongo/candidate_records*.json]
+  parliament => show only for parliament
+  	     	[grep 'code' mongo/parliaments.json]
 ```
 
-* http://localhost:3000/api/candidate-count?year=2015&group_by=party,parliament_code [ General allpurpose candidate-count]
+
+* By Party [return candidate count for each party for each parliment]
+  url => http://localhost:3000/api/candidates/count/by-party?year=2015&party=NLFD&paliament=PTH
+
 ```
-  *Params*
-  `year` => 2010 or 2015
-  `party` => party code (grep 'code' mongo/parties.json)
-  `constituency` => constituency code (grep constituency mongo/candidate_records_201?.json)
-  `parliament` => parliament code (grep parliment_code mongo/candidate_records_201?.json)
-  `group_by` => party and/or parliament_code and/or constituency
-		technially any field in `candidate_records`
-   http://localhost:3000/api/candidate-count?year=2015&group_by=candidate.gender,parliament_code
+  Params
+  ------
+  year => 2010 or 2015
+  party => show only for party
+  constituency => show only for constituency
+  parliament => show only for parliament
+```
+
+
+* General Purpose
+  url =>  http://localhost:3000/api/candidates/count?year=2015&group_by=party,parliament_code
+```
+  Params
+  ------
+  year => 2010 or 2015
+  party => show only for party
+  constituency => shor only for constituency
+  parliament => show only for parliament
+  group_by => party and/or parliament_code and/or constituency
+	      technially any field in `candidate_records`
 ```
 
 ## Pre-require ##
