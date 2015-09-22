@@ -67,6 +67,7 @@ CandidateHandler.getCount = function(request) {
     	    constituency: "$_id.constituency",
     	    gender: "$_id.candidate_gender",
     	    ethnicity: "$_id.candidate_ethnicity",
+    	    religion: "$_id.candidate_religion",
     	    agegroup: "$_id.agegroup"
     	  }
     });
@@ -158,6 +159,36 @@ CandidateHandler.getByEthnicityCount = function (query) {
   var $project =  {
     _id: 0,
     ethnicity_counts: 1,
+    total_count: 1
+  };
+
+  if (group_by) {
+    $project[group_by] = "$_id";
+    $group._id = '$' + group_by;
+  }
+
+  query.$post_pipeline = [
+    { $group: $group},
+    { $project: $project}
+  ];
+
+  return CandidateHandler.getCount(query);
+};
+
+CandidateHandler.getByReligionCount = function (query) {
+  query.year = 2015;
+  var group_by = query.group_by;
+  query.group_by = group_by ?  group_by + ',candidate.religion': 'candidate.religion';
+
+  var $group = {
+    _id: null,
+    religion_counts: {$addToSet: {count: "$count", religion: '$religion'}},
+    total_count: {$sum: '$count'}
+  };
+
+  var $project =  {
+    _id: 0,
+    religion_counts: 1,
     total_count: 1
   };
 

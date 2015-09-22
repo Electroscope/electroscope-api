@@ -47,6 +47,20 @@ Electroscope API
   parliament => show only for parliament
 ```
 
+### By Religion ###
+* return candidate count by religion for each parliment or party
+*  url => http://localhost:3000/api/candidates/count/by-religion?party=NLFD
+
+```
+  Params
+  ------
+  group_by => either 'party' or 'parliament'
+  year => only support 2015 right now
+  party => show only for party
+  constituency => show only for constituency
+  parliament => show only for parliament
+```
+
 ### By Agegroup ###
 * return (candidate) agegroup ranges for each parliment or party
 *  url => http://localhost:3000/api/candidates/count/by-agegroup?year=2015&group_by=party
