@@ -1,12 +1,11 @@
 Electroscope API
 ================
-
 ## Endpoints ###
 
 ### Candidate Count ###
 
 * By Gender [return M or F count for each party or parliament]
-**  url => http://localhost:3000/api/candidates/count/by-gender?year=2015&group_by=parliment
++  url => http://localhost:3000/api/candidates/count/by-gender?year=2015&group_by=parliment
 
 ```
   Params
@@ -21,9 +20,8 @@ Electroscope API
   	     	[grep 'code' mongo/parliaments.json]
 ```
 
-
 * By Party [return candidate count for each party for each parliment]
-**  url => http://localhost:3000/api/candidates/count/by-party?year=2015&party=NLFD&paliament=PTH
++  url => http://localhost:3000/api/candidates/count/by-party?year=2015&party=NLFD&paliament=PTH
 
 ```
   Params
@@ -35,7 +33,17 @@ Electroscope API
 ```
 
 * By Ethnicity [return (candidate) ethnicity count for each parliment or party]
-**  url => http://localhost:3000/api/candidates/count/by-ethnicity?group_by=party
++  url => http://localhost:3000/api/candidates/count/by-ethnicity?group_by=party
+```
+  group_by => either 'party' or 'parliament'
+  year => only support 2015 right now
+  party => show only for party
+  constituency => show only for constituency
+  parliament => show only for parliament
+```
+
+* By Agegroup [return (candidate) agegroup ranges for each parliment or party]
++  url => http://localhost:3000/api/candidates/count/by-agegroup?year=2015&group_by=party
 ```
   group_by => either 'party' or 'parliament'
   year => only support 2015 right now
@@ -45,7 +53,7 @@ Electroscope API
 ```
 
 * General Purpose
-**  url =>  http://localhost:3000/api/candidates/count?year=2015&group_by=party,parliament_code
++  url =>  http://localhost:3000/api/candidates/count?year=2015&group_by=party,parliament_code
 
 ```
   Params

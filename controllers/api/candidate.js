@@ -43,4 +43,14 @@ CandidateController.router.get("/candidates/count/by-ethnicity", function (req, 
     });
 });
 
+CandidateController.router.get("/candidates/count/by-agegroup", function (req, res, next) {
+  var query = req.query;
+  CandidateHandler.getByAgegroupCount(query)
+    .then(function (result) {
+      res.send({data: result});
+    }).catch(function (err) {
+      next(err);
+    });
+});
+
 module.exports = CandidateController.router;

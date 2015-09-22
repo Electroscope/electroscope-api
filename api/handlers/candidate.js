@@ -50,22 +50,29 @@ CandidateHandler.getCount = function(request) {
 
   return new Promise(function (resolve, reject) {
     var pipeline = [];
+
     pipeline.push({$match: $match});
+
+    if (request.$pre_pipeline) {
+      pipeline = pipeline.concat(request.$pre_pipeline);
+    }
+
     pipeline.push({$group: $group});
     pipeline.push({
-	  $project: {
-	    _id: 0,
-	    count: 1,
-	    party: "$_id.party",
-	    parliament: "$_id.parliament",
-	    constituency: "$_id.constituency",
-	    gender: "$_id.candidate_gender",
-	    ethnicity: "$_id.candidate_ethnicity"
-	  }
+    	  $project: {
+    	    _id: 0,
+    	    count: 1,
+    	    party: "$_id.party",
+    	    parliament: "$_id.parliament",
+    	    constituency: "$_id.constituency",
+    	    gender: "$_id.candidate_gender",
+    	    ethnicity: "$_id.candidate_ethnicity",
+    	    agegroup: "$_id.agegroup"
+    	  }
     });
 
-    if (request.$extra_pipeline) {
-      pipeline = pipeline.concat(request.$extra_pipeline);
+    if (request.$post_pipeline) {
+      pipeline = pipeline.concat(request.$post_pipeline);
     }
 
     db.candidate_records.aggregate(pipeline, function(err, result) {
@@ -101,7 +108,7 @@ CandidateHandler.getByGenderCount = function(query){
     $group._id = '$' + group_by;
   }
 
-  query.$extra_pipeline = [
+  query.$post_pipeline = [
     { $match: {gender: {$in : [ 'M', 'F']}} } ,
     { $group: $group},
     { $project: $project}
@@ -129,7 +136,7 @@ CandidateHandler.getByPartyCount = function (query) {
       total_count: 1
     };
 
-  query.$extra_pipeline = [
+  query.$post_pipeline = [
     { $group: $group},
     { $project: $project}
   ];
@@ -159,7 +166,64 @@ CandidateHandler.getByEthnicityCount = function (query) {
     $group._id = '$' + group_by;
   }
 
-  query.$extra_pipeline = [
+  query.$post_pipeline = [
+    { $group: $group},
+    { $project: $project}
+  ];
+
+  return CandidateHandler.getCount(query);
+};
+
+CandidateHandler.getByAgegroupCount = function (query) {
+  query.year = 2015;
+  var group_by = query.group_by;
+  query.group_by = group_by ?  group_by + ',agegroup': 'agegroup';
+
+  query.$pre_pipeline = [{
+    $project: {
+      agegroup: {
+	$cond: [ { $lt: [ "$candidate.age", 30 ] },
+		 '<30',
+		 {
+		   $cond: [ { $lt: [ "$candidate.age", 50 ] },
+			    '30-50',
+			    {
+			      $cond: [ { $lt: [ "$candidate.age", 70 ] },
+				       '50-70',
+				       '>70'
+				     ]
+			    }
+			  ]
+		 }
+	       ]
+      },
+      constituency: 1,
+      ethnicity: 1,
+      ethnic_seat: 1,
+      parliament: 1,
+      party: 1,
+      year: 1,
+      _id: 0
+    }}];
+
+  var $group = {
+    _id: null,
+    agegroup_counts: {$addToSet: {count: "$count", agegroup: '$agegroup'}},
+    total_count: {$sum: '$count'}
+  };
+
+  var $project =  {
+    _id: 0,
+    agegroup_counts: 1,
+    total_count: 1
+  };
+
+  if (group_by) {
+    $project[group_by] = "$_id";
+    $group._id = '$' + group_by;
+  }
+
+  query.$post_pipeline = [
     { $group: $group},
     { $project: $project}
   ];
