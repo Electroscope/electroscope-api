@@ -105,37 +105,37 @@ db.collection('parliaments').drop(function(){
     });
 });
 
-db.collection('party_records').drop(function(){
-  console.log("Importing Parties ...");
-  var parties = require('./parties.json');
-  db.collection('party_records').insert(parties, function(err, data){
-  count += 1;
-      if(err){
-        throw err;
-      }
-      console.log("party_records count", count);
-      db.collection('party_records').ensureIndex({"location_code": 1});
-      emitter.emit('import_done', count);
-  });
-});
+// db.collection('party_records').drop(function(){
+//   console.log("Importing Parties ...");
+//   var parties = require('./parties.json');
+//   db.collection('party_records').insert(parties, function(err, data){
+//   count += 1;
+//       if(err){
+//         throw err;
+//       }
+//       console.log("party_records count", count);
+//       db.collection('party_records').ensureIndex({"location_code": 1});
+//       emitter.emit('import_done', count);
+//   });
+// });
 
-db.collection('candidate_records').drop(function(){
-  console.log("Importing Candidate Records ...");
-  var c2010 = require('./candidate_records_2010.json');
-  var c2015 = require('./candidate_records_2015.json');
-  var docs = c2010.concat(c2015);
-  var collection = db.collection('candidate_records');
-  var track = docs.length;
-  db.batchInsert(collection, docs, function(err, data){
-    if(err){
-      throw err;
-    }
-    track -= 1;
-    console.log("Candidate Record Left", track);
-    if(track <= 0){
-      console.log("All candidates inserted now");
-      count += 1;
-      emitter.emit('import_done', count);      
-    }
-  });
-});
+// db.collection('candidate_records').drop(function(){
+//   console.log("Importing Candidate Records ...");
+//   var c2010 = require('./candidate_records_2010.json');
+//   var c2015 = require('./candidate_records_2015.json');
+//   var docs = c2010.concat(c2015);
+//   var collection = db.collection('candidate_records');
+//   var track = docs.length;
+//   db.batchInsert(collection, docs, function(err, data){
+//     if(err){
+//       throw err;
+//     }
+//     track -= 1;
+//     console.log("Candidate Record Left", track);
+//     if(track <= 0){
+//       console.log("All candidates inserted now");
+//       count += 1;
+//       emitter.emit('import_done', count);
+//     }
+//   });
+// });
