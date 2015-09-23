@@ -216,6 +216,37 @@ CandidateHandler.getByPartyCount = function (query) {
   return CandidateHandler.getCount(query);
 };
 
+CandidateHandler.getByParliamentCount = function (query) {
+    /* if there is no year parameter use 2015 by default */
+  query.year = query.year || 2015;
+  var group_by = query.group_by;
+  query.group_by = group_by ?  group_by + ',parliament': 'parliament';
+
+  var $group = {
+    _id: null,
+    parliament_counts: {$addToSet: {count: "$count", parliament: '$parliament'}},
+    total_count: {$sum: '$count'}
+  };
+
+  var $project =  {
+    _id: 0,
+    parliament_counts: 1,
+    total_count: 1
+  };
+
+  if (group_by) {
+    $project[group_by] = "$_id";
+    $group._id = '$' + group_by;
+  }
+
+  query.$post_pipeline = [
+    { $group: $group},
+    { $project: $project}
+  ];
+
+  return CandidateHandler.getCount(query);
+};
+
 CandidateHandler.getByStateCount = function (query) {
     /* if there is no year parameter use 2015 by default */
     /* if there is no year parameter use 2015 by default */
