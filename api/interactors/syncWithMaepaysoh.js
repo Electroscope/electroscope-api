@@ -4,7 +4,7 @@ var CandidateHandler = require("../handlers/candidate");
 var PartyHandler = require("../handlers/party");
 var LocationHandler = require("../handlers/location");
 
-var tasks = [partySyncTask, candidateSyncTask]; //, locationSyncTask];
+var tasks = [partySyncTask, candidateSyncTask, locationSyncTask];
 
 var ro = "\\ | / -".split(" ");
 var time = 0;
