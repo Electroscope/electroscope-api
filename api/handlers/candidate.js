@@ -11,17 +11,17 @@ var db = mongojs('electroscope', ['candidate_records', 'party_records']);
 
 MaePaySohAPI.candidate.getAll = function () {
   return new Promise(function (resolve, reject) {
-    request.get('https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
-		//'http://localhost:2001/candidate.json',
-		function (err, resp, body) {
-		  if (err) { reject (err); }
-		  var candidates = body.toString().split('\n').map(function (line) {
-		    try {return JSON.parse(line);}
-		    catch (err) {return null;}
-		  });
-		  resolve(candidates);
-		}
-	       );
+    request.get(
+      'https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
+      //'http://localhost:2001/candidate.json',
+      function (err, resp, body) {
+	if (err) { reject (err); }
+	var candidates = body.toString().split('\n').map(function (line) {
+	  try {return JSON.parse(line);}
+	  catch (err) {return null;}
+	});
+	resolve(candidates);
+      });
   });
 };
 
@@ -47,6 +47,7 @@ CandidateHandler.syncWithMaePaySoh = function () {
 	record.candidate.religion = c.religion;
 	record.candidate.ethnicity = c.ethnicity;
 	record.candidate.gender = c.gender;
+	record.candidate.birthdate = new Date(c.birthdate.$date);
 	record.candidate.age = new Date().getYear() - new Date(c.birthdate.$date).getYear() ;
 
 	record.party = c.party_id;
@@ -62,6 +63,19 @@ CandidateHandler.syncWithMaePaySoh = function () {
 	  break;
 	default:
 	  record.constituency = c.constituency.TS_PCODE;
+	}
+
+	record.educated = false;
+	if (c.education.match(/B\./)) {
+	  record.educated = true;
+	}
+
+	if (c.education.indexOf("ဘွဲ့") != -1){
+	  record.educated = true;
+	}
+
+	if (c.education.match(/Dip/)) {
+	  record.educated = true;
 	}
 
 	candidate_records.push(record);
@@ -113,7 +127,8 @@ CandidateHandler.getCount = function(request) {
 
     var $project = {
       constituency: 1, parliament: 1, party: 1,
-      year: 1, candidate:1, _id: 0, state: 1
+      year: 1, candidate:1, _id: 0, state: 1,
+      educated: 1
     };
 
     for (var attr in request.$initial_project) {
@@ -135,7 +150,8 @@ CandidateHandler.getCount = function(request) {
     	    ethnicity: "$_id.candidate_ethnicity",
     	    religion: "$_id.candidate_religion",
     	    agegroup: "$_id.agegroup",
-	    state: "$_id.state"
+	    state: "$_id.state",
+	    educated: "$_id.educated"
     	  }
     });
 
@@ -200,6 +216,37 @@ CandidateHandler.getByPartyCount = function (query) {
   var $project =  {
     _id: 0,
     party_counts: 1,
+    total_count: 1
+  };
+
+  if (group_by) {
+    $project[group_by] = "$_id";
+    $group._id = '$' + group_by;
+  }
+
+  query.$post_pipeline = [
+    { $group: $group},
+    { $project: $project}
+  ];
+
+  return CandidateHandler.getCount(query);
+};
+
+CandidateHandler.getEducatedCount = function (query) {
+    /* if there is no year parameter use 2015 by default */
+  query.year = query.year || 2015;
+  var group_by = query.group_by;
+  query.group_by = group_by ?  group_by + ',educated': 'educated';
+
+  var $group = {
+    _id: null,
+    educated_counts: {$addToSet: {count: "$count", educated: '$educated'}},
+    total_count: {$sum: '$count'}
+  };
+
+  var $project =  {
+    _id: 0,
+    educated_counts: 1,
     total_count: 1
   };
 

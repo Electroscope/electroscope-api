@@ -92,6 +92,21 @@ Electroscope API
   state => show only for state
 ```
 
+### By Educated ###
+* return candidate count whether he/she holds any higher diploma or degree
+*  url => http://localhost:3000/api/candidates/count/by-educated?party=NLFD
+
+```
+  Params
+  ------
+  group_by => either 'party' or 'parliament' or state
+  year => only support 2015 right now
+  party => show only for party
+  constituency => show only for constituency
+  parliament => show only for parliament
+  state => show only for state
+```
+
 ### By Agegroup ###
 * return (candidate) agegroup ranges for each parliment or party
 *  url => http://localhost:3000/api/candidates/count/by-agegroup?year=2015&group_by=party

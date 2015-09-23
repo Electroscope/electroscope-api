@@ -53,6 +53,16 @@ CandidateController.router.get("/candidates/count/by-state", function (req, res,
     });
 });
 
+CandidateController.router.get("/candidates/count/by-educated", function (req, res, next) {
+  var query = req.query;
+  CandidateHandler.getEducatedCount(query)
+    .then(function (result) {
+      res.send({data: result});
+    }).catch(function (err) {
+      next(err);
+    });
+});
+
 CandidateController.router.get("/candidates/count/by-ethnicity", function (req, res, next) {
   var query = req.query;
   CandidateHandler.getByEthnicityCount(query)
