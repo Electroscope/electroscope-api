@@ -189,20 +189,24 @@ CandidateHandler.getByPartyCount = function (query) {
     /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
   var group_by = query.group_by;
-  query.group_by = 'party,parliament'; // 'party'
+  query.group_by = group_by ?  group_by + ',party': 'party';
 
   var $group = {
-      _id: '$party',
-      parliament_counts: {$addToSet: {count: "$count", parliament: '$parliament'}},
-      total_count: {$sum: '$count'}
-    };
+    _id: null,
+    party_counts: {$addToSet: {count: "$count", party: '$party'}},
+    total_count: {$sum: '$count'}
+  };
 
-  var $project = {
-      party: '$_id',
-      _id: 0,
-      parliament_counts: 1,
-      total_count: 1
-    };
+  var $project =  {
+    _id: 0,
+    party_counts: 1,
+    total_count: 1
+  };
+
+  if (group_by) {
+    $project[group_by] = "$_id";
+    $group._id = '$' + group_by;
+  }
 
   query.$post_pipeline = [
     { $group: $group},
@@ -214,22 +218,27 @@ CandidateHandler.getByPartyCount = function (query) {
 
 CandidateHandler.getByStateCount = function (query) {
     /* if there is no year parameter use 2015 by default */
+    /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
   var group_by = query.group_by;
-  query.group_by = 'state,party';
+  query.group_by = group_by ?  group_by + ',state': 'state';
 
   var $group = {
-      _id: '$state',
-      party_counts: {$addToSet: {count: "$count", party: '$party'}},
-      total_count: {$sum: '$count'}
+    _id: null,
+    state_counts: {$addToSet: {count: "$count", state: '$state'}},
+    total_count: {$sum: '$count'}
   };
 
-  var $project = {
-      state: '$_id',
-      _id: 0,
-      party_counts: 1,
-      total_count: 1
-    };
+  var $project =  {
+    _id:  0,
+    state_counts: 1,
+    total_count: 1
+  };
+
+  if (group_by) {
+    $project[group_by] = "$_id";
+    $group._id = '$' + group_by;
+  }
 
   query.$post_pipeline = [
     { $group: $group},
