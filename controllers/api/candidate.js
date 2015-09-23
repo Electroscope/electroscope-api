@@ -33,6 +33,16 @@ CandidateController.router.get("/candidates/count/by-party", function (req, res,
     });
 });
 
+CandidateController.router.get("/candidates/count/by-state", function (req, res, next) {
+  var query = req.query;
+  CandidateHandler.getByStateCount(query)
+    .then(function (result) {
+      res.send({data: result});
+    }).catch(function (err) {
+      next(err);
+    });
+});
+
 CandidateController.router.get("/candidates/count/by-ethnicity", function (req, res, next) {
   var query = req.query;
   CandidateHandler.getByEthnicityCount(query)
