@@ -65,6 +65,7 @@ function partySyncTask() {
 }
 
 function locationSyncTask() {
+  return exit();
   // Start Sync with maepaysoh
   LocationHandler.model.remove()
     .then(function () {
