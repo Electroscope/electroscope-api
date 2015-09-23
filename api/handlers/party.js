@@ -13,17 +13,19 @@ PartyHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
     MaePaySohAPI.party.getAll(function (parties) {
-      console.log(parties.length + " parties are got!!");
+      console.log("RECEIVED: " + parties.length + " records.");
     }).then(function (parties) {
+
       db.collection('party_records').drop(function (){
-	console.log("Dropped Existing Party Collection.");
+	console.log("DROPPED: Existing records.");
       });
 
-      var records = [];
+      var party_records = [];
       for (var i = 0; i < parties.length; i++) {
       	var p = parties[i];
       	var party = {};
 
+	party._id = p['id'];
       	party.code = getPartyCode (p['party_name_english']);
       	party.name = {
       	  en: p['party_name_english'],
@@ -31,12 +33,12 @@ PartyHandler.syncWithMaePaySoh = function () {
       	};
       	party.seal = p['party_seal'];
       	party.flag = p['party_flag'];
-	records.push(party);
+	party_records.push(party);
       }
 
-      db.collection('party_records').insert(records, function() {
-	console.log("Imported " + records.length + " parties.");
-	resolve(records);
+      db.collection('party_records').insert(party_records, function(err, doc) {
+	if (err) { reject(err); }
+	resolve(party_records);
       });
 
     }).catch(reject);

@@ -4,24 +4,83 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 
 var CandidateHandler = new Handler(CandidateModel);
 
+var async = require('async');
+var request = require('request');
 var mongojs = require("mongojs");
 var db = mongojs('electroscope', ['candidate_records', 'party_records']);
+
+MaePaySohAPI.candidate.getAll = function () {
+  return new Promise(function (resolve, reject) {
+    request.get('https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
+		//'http://localhost:2001/candidate.json',
+		function (err, resp, body) {
+		  if (err) { reject (err); }
+		  var candidates = body.toString().split('\n').map(function (line) {
+		    try {return JSON.parse(line);}
+		    catch (err) {return null;}
+		  });
+		  resolve(candidates);
+		}
+	       );
+  });
+};
 
 CandidateHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
     MaePaySohAPI.candidate.getAll(function (candidates) {
-      console.log(candidates.length + " candidates are got!!");
+      console.log("RECEIVED: " + candidates.length + " records.");
     }).then(function (candidates) {
+      db.collection('candidate_records').drop(function (){
+	console.log("DROPPED: Existing records.");
+      });
 
-      handler.create({
-        data: candidates
-      }).then(function () {
-        console.log(candidates.length
-            + " candidates had been saved");
-        resolve(candidates);
-      }).catch(reject);
+      var candidate_records = [];
+      for (var i = 0; i < candidates.length; i += 1) {
+	var c = candidates[i];
+	if (c == null) { continue; }
 
+	var record = {};
+	record.year = 2015;
+	record.candidate = {};
+	record.candidate.name = c.name;
+	record.candidate.religion = c.religion;
+	record.candidate.ethnicity = c.ethnicity;
+	record.candidate.gender = c.gender;
+	record.candidate.age = new Date().getYear() - new Date(c.birthdate.$date).getYear() ;
+
+	record.party = c.party_id;
+	record.parliament = getParliament(c);
+	record.state = getState(c, record.parliament);
+
+	switch (record.parliament) {
+	case 'PTH':
+	  record.constituency = c.constituency.TS_PCODE;
+	  break;
+	case 'AMH':
+	  record.constituency = c.constituency.AM_PCODE;
+	  break;
+	default:
+	  record.constituency = c.constituency.TS_PCODE;
+	}
+
+	candidate_records.push(record);
+      }
+
+      async.map(candidate_records,
+		function (item, callback) {
+		  /* add parliament  and insert */
+		  db.collection('party_records').findOne({_id : item.party}, function(err, doc) {
+		    if(err) { reject(err); }
+		    item.party = (doc == null) ? 0 : doc.code;
+		    db.collection('candidate_records').insert(item, callback);
+		  });
+		},
+		function (err, results) {
+		  if (err) { reject(err); }
+		  resolve(candidate_records);
+		}
+	       );
     }).catch(reject);
   });
 };
@@ -45,19 +104,26 @@ CandidateHandler.getCount = function(request) {
 
   /* optional parameters */
   if (request.party) { $match.party = request.party; }
+  if (request.state) { $match.state = request.state; }
   if (request.constituency) { $match.constituency = request.constituency; }
   if (request.parliament) { $match.parliament = request.parliament; }
 
   return new Promise(function (resolve, reject) {
     var pipeline = [];
 
-    pipeline.push({$match: $match});
+    var $project = {
+      constituency: 1, parliament: 1, party: 1,
+      year: 1, candidate:1, _id: 0, state: 1
+    };
 
-    if (request.$pre_pipeline) {
-      pipeline = pipeline.concat(request.$pre_pipeline);
+    for (var attr in request.$initial_project) {
+      $project[attr] = request.$initial_project[attr];
     }
 
+    pipeline.push({$project: $project});
+    pipeline.push({$match: $match});
     pipeline.push({$group: $group});
+
     pipeline.push({
     	  $project: {
     	    _id: 0,
@@ -68,7 +134,8 @@ CandidateHandler.getCount = function(request) {
     	    gender: "$_id.candidate_gender",
     	    ethnicity: "$_id.candidate_ethnicity",
     	    religion: "$_id.candidate_religion",
-    	    agegroup: "$_id.agegroup"
+    	    agegroup: "$_id.agegroup",
+	    state: "$_id.state"
     	  }
     });
 
@@ -145,6 +212,33 @@ CandidateHandler.getByPartyCount = function (query) {
   return CandidateHandler.getCount(query);
 };
 
+CandidateHandler.getByStateCount = function (query) {
+    /* if there is no year parameter use 2015 by default */
+  query.year = query.year || 2015;
+  var group_by = query.group_by;
+  query.group_by = 'state,party';
+
+  var $group = {
+      _id: '$state',
+      party_counts: {$addToSet: {count: "$count", party: '$party'}},
+      total_count: {$sum: '$count'}
+  };
+
+  var $project = {
+      state: '$_id',
+      _id: 0,
+      party_counts: 1,
+      total_count: 1
+    };
+
+  query.$post_pipeline = [
+    { $group: $group},
+    { $project: $project}
+  ];
+
+  return CandidateHandler.getCount(query);
+};
+
 CandidateHandler.getByEthnicityCount = function (query) {
   query.year = 2015;
   var group_by = query.group_by;
@@ -210,32 +304,13 @@ CandidateHandler.getByAgegroupCount = function (query) {
   var group_by = query.group_by;
   query.group_by = group_by ?  group_by + ',agegroup': 'agegroup';
 
-  query.$pre_pipeline = [{
-    $project: {
-      agegroup: {
-	$cond: [ { $lt: [ "$candidate.age", 30 ] },
-		 '<30',
-		 {
-		   $cond: [ { $lt: [ "$candidate.age", 50 ] },
-			    '30-50',
-			    {
-			      $cond: [ { $lt: [ "$candidate.age", 70 ] },
-				       '50-70',
-				       '>70'
-				     ]
-			    }
-			  ]
-		 }
-	       ]
-      },
-      constituency: 1,
-      ethnicity: 1,
-      ethnic_seat: 1,
-      parliament: 1,
-      party: 1,
-      year: 1,
-      _id: 0
-    }}];
+  query.$initial_project = {
+    agegroup: {
+      $cond: [{ $lt: [ "$candidate.age", 30 ] }, '<30',
+	      {$cond: [{ $lt: [ "$candidate.age", 50 ] }, '30-50',
+		       {$cond: [{ $lt: [ "$candidate.age", 70 ] }, '50-70',
+				'>70']}]}]
+    }};
 
   var $group = {
     _id: null,
@@ -260,6 +335,57 @@ CandidateHandler.getByAgegroupCount = function (query) {
   ];
 
   return CandidateHandler.getCount(query);
+};
+
+var getParliament = function (candidate) {
+  var parliaments = {
+    "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်": "-RGH",
+    "ပြည်သူ့လွှတ်တော်": "PTH",
+    "အမျိုးသားလွှတ်တော်": "AMH"
+  };
+
+  p = parliaments[candidate.legislature];
+  if (p == '-RGH') {
+    p = getState(candidate, '-RGH') + p;
+  }
+  return p;
+};
+
+var getState = function (candidate, parliament){
+  var statenames = {
+    "ကချင်ပြည်နယ်": "Kachin",
+    "ကယားပြည်နယ်": "Kayah",
+    "ကရင်ပြည်နယ်": "Kayin",
+    "ချင်းပြည်နယ်": "Chin",
+    "စစ်ကိုင်းတိုင်းဒေသကြီး": "Sagaing",
+    "တနင်္သာရီတိုင်းဒေသကြီး": "Tanintharyi",
+    "ပဲခူးတိုင်းဒေသကြီး": "Bago",
+    "မကွေးတိုင်းဒေသကြီး": "Magway",
+    "မန္တလေးတိုင်းဒေသကြီး": "Mandalay",
+    "မွန်ပြည်နယ်": "Mon",
+    "ရခိုင်ပြည်နယ်": "Rakhine",
+    "ရန်ကုန်တိုင်းဒေသကြီး": "Yangon",
+    "ရှမ်းပြည်နယ်": "Shan",
+    "ဧရာဝတီတိုင်းဒေသကြီး": "Ayeyarwady",
+    "ဧရာဝတီတိုင်း���ေသကြီး": "Ayeyarwady",
+    "ပြည်တောင်စုနယ်မြေ": "Federal",
+    "ကချင်": "Kachin",
+    "ကယား": "Kayah",
+    "ကရင်": "Kayin",
+    "ချင်း": "Chin",
+    "စစ်ကိုင်း": "Sagaing",
+    "တနင်္သာရီ": "Tanintharyi",
+    "ပဲခူး": "Bago",
+    "မကွေး": "Magway",
+    "မန္တလေး": "Mandalay",
+    "မွန်": "Mon",
+    "ရခိုင်": "Rakhine",
+    "ရန်ကုန်": "Yangon",
+    "ရှမ်း": "Shan",
+    "ဧရာဝတီ": "Ayeyarwady"
+  };
+
+  return statenames[candidate.constituency.parent];
 };
 
 module.exports = CandidateHandler;
