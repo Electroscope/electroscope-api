@@ -18,12 +18,11 @@
     "mongojs": "^1.3.0",
     "morgan": "~1.6.1",
     "request": "^2.61.0",
-    "serve-favicon": "~2.3.0",
-    "nodemon": "*"
+    "nodemon": "^1.4.1",
+    "serve-favicon": "~2.3.0"
   },
   "devDependencies": {
     "mocha": "^2.3.0",
-    "nodemon": "^1.4.1",
     "should": "^7.1.0"
   },
   "engines": {
