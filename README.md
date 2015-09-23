@@ -10,7 +10,7 @@ Electroscope API
 ```
   Params
   ------
-  group_by => either 'party' or 'parliament'
+  group_by => either 'party' or 'parliament'  or state
   year => only support 2015 right now
   party => show only for party
   	   [grep 'code' mongo/parties.json]
@@ -22,14 +22,14 @@ Electroscope API
 
 ### By Party ###
 * return candidate count for each party for each parliment
-*  url => http://localhost:3000/api/candidates/count/by-party?year=2015&party=NLFD&paliament=PTH
+*  url => http://localhost:3000/api/candidates/count/by-party?year=2015&party=NLFD&parliament=PTH
 
 ```
   Params
   ------
   year => 2010 or 2015
+  group_by => either 'state' or 'parliament'
   party => show only for party
-  constituency => show only for constituency
   parliament => show only for parliament
 ```
 
@@ -41,7 +41,9 @@ Electroscope API
   Params
   ------
   year => 2010 or 2015
+  group_by => either 'party' or 'parliament'
   state => show only for state
+  parliament => show only for parliament
 ```
 
 ### By Ethnicity ###
@@ -51,7 +53,7 @@ Electroscope API
 ```
   Params
   ------
-  group_by => either 'party' or 'parliament'
+  group_by => either 'party' or 'parliament' or state
   year => only support 2015 right now
   party => show only for party
   constituency => show only for constituency
@@ -65,7 +67,7 @@ Electroscope API
 ```
   Params
   ------
-  group_by => either 'party' or 'parliament'
+  group_by => either 'party' or 'parliament' or state
   year => only support 2015 right now
   party => show only for party
   constituency => show only for constituency
@@ -79,7 +81,7 @@ Electroscope API
 ```
   Params
   ------
-  group_by => either 'party' or 'parliament'
+  group_by => either 'party' or 'parliament' or state
   year => only support 2015 right now
   party => show only for party
   constituency => show only for constituency
