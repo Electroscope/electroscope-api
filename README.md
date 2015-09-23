@@ -33,6 +33,17 @@ Electroscope API
   parliament => show only for parliament
 ```
 
+### By State ###
+* return candidate count for each party in each state
+*  url => http://localhost:3000/api/candidates/count/by-state?state=Chin
+
+```
+  Params
+  ------
+  year => 2010 or 2015
+  state => show only for state
+```
+
 ### By Ethnicity ###
 * return (candidate) ethnicity count for each parliment or party
 *  url => http://localhost:3000/api/candidates/count/by-ethnicity?group_by=party
