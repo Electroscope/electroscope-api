@@ -23,6 +23,16 @@ CandidateController.router.get("/candidates/count/by-gender", function (req, res
     });
 });
 
+CandidateController.router.get("/candidates/count/by-naythar", function (req, res, next) {
+  var query = req.query;
+  CandidateHandler.getByNaytharCount(query)
+    .then(function (result) {
+      res.send({data: result});
+    }).catch(function (err) {
+      next(err);
+    });
+});
+
 CandidateController.router.get("/candidates/count/by-party", function (req, res, next) {
   var query = req.query;
   CandidateHandler.getByPartyCount(query)
