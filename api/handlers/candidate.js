@@ -469,12 +469,12 @@ var getParliament = function (candidate) {
 
   p = parliaments[candidate.legislature];
   if (p == '-RGH') {
-    p = getState(candidate, '-RGH') + p;
+    p = getState(candidate).toUpperCase() + p;
   }
   return p;
 };
 
-var getState = function (candidate, parliament){
+var getState = function (candidate){
   var statenames = {
     "ကချင်ပြည်နယ်": "Kachin",
     "ကယားပြည်နယ်": "Kayah",
