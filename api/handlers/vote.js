@@ -66,7 +66,7 @@ VoteHandler.getCount = function(request) {
 
     if (request.$post_pipeline) {
       pipeline = pipeline.concat(request.$post_pipeline);
-      pipeline.push({$sort: {total_count: -1}});
+      pipeline.push({$sort: {total_votes: -1}});
     }
 
     db.candidate_records.aggregate(pipeline, function(err, result) {
@@ -87,14 +87,14 @@ VoteHandler.getByPartyCount = function (query) {
 
   var $group = {
     _id: null,
-    party_counts: {$addToSet: {count: "$votes", party: '$party'}},
-    total_count: {$sum: '$votes'}
+    party_counts: {$addToSet: {votes: "$votes", party: '$party'}},
+    total_votes: {$sum: '$votes'}
   };
 
   var $project =  {
     _id: 0,
     party_counts: 1,
-    total_count: 1
+    total_votes: 1
   };
 
   if (group_by) {
@@ -118,14 +118,14 @@ VoteHandler.getByParliamentCount = function (query) {
 
   var $group = {
     _id: null,
-    party_counts: {$addToSet: {count: "$votes", party: '$parliament'}},
-    total_count: {$sum: '$votes'}
+    party_counts: {$addToSet: {votes: "$votes", party: '$parliament'}},
+    total_votes: {$sum: '$votes'}
   };
 
   var $project =  {
     _id: 0,
     party_counts: 1,
-    total_count: 1
+    total_votes: 1
   };
 
   if (group_by) {
@@ -149,14 +149,14 @@ VoteHandler.getByStateCount = function (query) {
 
   var $group = {
     _id: null,
-    party_counts: {$addToSet: {count: "$votes", party: '$state'}},
-    total_count: {$sum: '$votes'}
+    party_counts: {$addToSet: {votes: "$votes", party: '$state'}},
+    total_votes: {$sum: '$votes'}
   };
 
   var $project =  {
     _id: 0,
     party_counts: 1,
-    total_count: 1
+    total_votes: 1
   };
 
   if (group_by) {
