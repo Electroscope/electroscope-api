@@ -27,7 +27,7 @@ db.batchInsert = function(collection, docs, options, callback) {
 
 emitter.on("import_done", function(data){
   console.log("Imported count", data);
-  if(data === 7){
+  if(data === 6){
     console.log("Closing connection now");
     db.close();
     process.exit(0);
@@ -119,23 +119,19 @@ db.collection('parliaments').drop(function(){
 //   });
 // });
 
-// db.collection('candidate_records').drop(function(){
-//   console.log("Importing Candidate Records ...");
-//   var c2010 = require('./candidate_records_2010.json');
-//   var c2015 = require('./candidate_records_2015.json');
-//   var docs = c2010.concat(c2015);
-//   var collection = db.collection('candidate_records');
-//   var track = docs.length;
-//   db.batchInsert(collection, docs, function(err, data){
-//     if(err){
-//       throw err;
-//     }
-//     track -= 1;
-//     console.log("Candidate Record Left", track);
-//     if(track <= 0){
-//       console.log("All candidates inserted now");
-//       count += 1;
-//       emitter.emit('import_done', count);
-//     }
-//   });
-// });
+console.log("Importing Candidate Records ...");
+var c2010 = require('./candidate_records_2010.json');
+var collection = db.collection('candidate_records');
+var track = c2010.length;
+db.batchInsert(collection, c2010, function(err, data){
+  if(err){
+    throw err;
+  }
+  track -= 1;
+  console.log("Candidate Record Left", track);
+  if(track <= 0){
+    console.log("All candidates inserted now");
+    count += 1;
+    emitter.emit('import_done', count);
+  }
+});
