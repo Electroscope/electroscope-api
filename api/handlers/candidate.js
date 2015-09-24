@@ -153,12 +153,13 @@ CandidateHandler.getCount = function(request) {
     	    religion: "$_id.candidate_religion",
     	    agegroup: "$_id.agegroup",
 	    state: "$_id.state",
-	    educated: "$_id.educated",
+	    educated: "$_id.educated"
     	  }
     });
 
     if (request.$post_pipeline) {
       pipeline = pipeline.concat(request.$post_pipeline);
+      pipeline.push({$sort: {total_count: -1}});
     }
 
     db.candidate_records.aggregate(pipeline, function(err, result) {
