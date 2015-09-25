@@ -15,12 +15,13 @@ MaePaySohAPI.candidate.getAll = function () {
       //'https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
       'http://localhost:3000/candidate.json',
       function (err, resp, body) {
-	if (err) { reject (err); }
-	var candidates = body.toString().split('\n').map(function (line) {
-	  try {return JSON.parse(line);}
-	  catch (err) {return null;}
-	});
-	resolve(candidates);
+        if (err) { reject (err); }
+        console.log(body);
+        var candidates = body.toString().split('\n').map(function (line) {
+          try {return JSON.parse(line);}
+          catch (err) {return null;}
+        });
+        resolve(candidates);
       });
   });
 };
