@@ -89,6 +89,7 @@ CandidateHandler.syncWithMaePaySoh = function () {
 		  db.collection('party_records').findOne({_id : item.party}, function(err, doc) {
 		    if(err) { reject(err); }
 		    item.party = (doc == null) ? 0 : doc.code;
+		    item.party_name = (doc == null) ? 0 : doc.name.en;
 		    db.collection('candidate_records').insert(item, callback);
 		  });
 		},
@@ -116,7 +117,6 @@ CandidateHandler.getCount = function(request) {
   group_by_list.forEach(function (each) {
     $group._id[each.replace('.', '_')] = '$' + each;
   });
-  console.info("GROUPBY => ", $group);
 
   /* optional parameters */
   if (request.party) { $match.party = request.party; }
@@ -162,6 +162,18 @@ CandidateHandler.getCount = function(request) {
       pipeline = pipeline.concat(request.$post_pipeline);
       pipeline.push({$sort: {total_count: -1}});
     }
+
+    if (request.sort_by) {
+      var $sort = {};
+      var sort_list = request.sort_by.split(',');
+      sort_list.forEach(function (each) {
+	$sort[each] =1;
+      });
+      pipeline.push({$sort: $sort});
+    }
+
+
+    console.info("PIPELINE => ", pipeline);
 
     db.candidate_records.aggregate(pipeline, function(err, result) {
       if (err) {
@@ -397,10 +409,13 @@ CandidateHandler.getByAgegroupCount = function (query) {
 
   query.$initial_project = {
     agegroup: {
-      $cond: [{ $lt: [ "$candidate.age", 30 ] }, '<30',
-	      {$cond: [{ $lt: [ "$candidate.age", 50 ] }, '30-50',
-		       {$cond: [{ $lt: [ "$candidate.age", 70 ] }, '50-70',
-				'>70']}]}]
+      $cond: [{ $lt: [ "$candidate.age", 30 ] }, '20-30',
+	      {$cond: [{ $lt: [ "$candidate.age", 40 ] }, '30-40',
+		       {$cond: [{ $lt: [ "$candidate.age", 50 ] }, '40-50',
+				{$cond: [{ $lt: [ "$candidate.age", 60 ] }, '50-60',
+					{$cond: [{ $lt: [ "$candidate.age", 70 ] }, '60-70',
+						'70+']}]}
+			       ]}]}]
     }};
 
   var $group = {
