@@ -66,9 +66,11 @@ CandidateHandler.syncWithMaePaySoh = function () {
 	  record.constituency = c.constituency.TS_PCODE;
 	}
 
-	if (record.constituency) {
-	  record.state_code = record.constituency.slice(0, 6);
+	if (!record.constituency) {
+	  record.constituency = guessConstituency(c);
 	}
+
+	record.state_code = record.constituency.slice(0, 6);
 
 	record.educated = false;
 	if (c.education.match(/B\./)) {
@@ -482,6 +484,25 @@ CandidateHandler.getByNaytharCount = function (query) {
   return CandidateHandler.getCount(query);
 };
 
+var guessConstituency = function (candidate) {
+  var towncodes = require('./constituency-code.json');
+  var location = candidate.constituency.name;
+
+  if (location.indexOf("တိုင်းရင်းသားလူမျိုး") > -1 ) {
+    var region = candidate.constituency.parent;
+    region = region.replace('ပြည်နယ်','');
+    region = region.replace('တိုင်းဒေသကြီး','');
+    return towncodes[region];
+  }
+
+  location = location.replace('မဲဆန္ဒနယ်', '');
+  location = location.replace('မဲဆန္ဒ���ယ်', '');
+  location = location.replace('မ���ဆန္ဒနယ်', '');
+  location = location.replace('မြို့နယ်', '');
+
+  return towncodes[location];
+};
+
 var getParliament = function (candidate) {
   var parliaments = {
    "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်": "RGH",
@@ -665,7 +686,6 @@ CandidateHandler.groupbyLegislatureStateDistrict = function (query) {
 CandidateHandler.partyCandidateCountByStates = function(query){
   var model = this.model;
   var match = {};
-
 
   if (query.legislature) {
     match.legislature = LEGISLATURES[query.legislature];
