@@ -26,9 +26,18 @@ PartyHandler.syncWithMaePaySoh = function () {
       	var party = {};
 
 	party._id = p['id'];
-      	party.code = getPartyCode (p['party_name_english']);
+	var party_name_english = p['party_name_english'];
+
+	if (p['party_name_english'] == "0" ) {
+	  party_name_english = "Chin League of Democracy";
+	}
+	if (p['party_name_english'] == "" ) {
+	  party_name_english = "Inn TainnYinThar Party";
+	}
+
+      	party.code = getPartyCode (party_name_english);
       	party.name = {
-      	  en: p['party_name_english'],
+      	  en: party_name_english,
       	  my: p['party_name']
       	};
       	party.seal = p['party_seal'];
@@ -36,12 +45,37 @@ PartyHandler.syncWithMaePaySoh = function () {
 	party_records.push(party);
       }
 
+      party_records.push({
+	code: getPartyCode("Individual Candidate"),
+	name: {
+	  en: "Individual Candidate"
+	}
+      });
+
       db.collection('party_records').insert(party_records, function(err, doc) {
 	if (err) { reject(err); }
 	resolve(party_records);
       });
 
     }).catch(reject);
+  });
+};
+
+
+var allParties = {};
+
+PartyHandler.getParties = function () {
+  var allParties = {};
+
+  return new Promise(function (resolve, reject) {
+    db.collection('party_records').find().forEach(function (err, doc) {
+      if(err) { reject(err); }
+      if (!doc) {
+	resolve(allParties);
+      } else {
+	allParties[doc.code] = doc.name.en;
+      }
+    });
   });
 };
 
