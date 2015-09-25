@@ -45,12 +45,28 @@ PartyHandler.syncWithMaePaySoh = function () {
 	party_records.push(party);
       }
 
-      party_records.push({
-	code: getPartyCode("Individual Candidate"),
-	name: {
-	  en: "Individual Candidate"
-	}
-      });
+      var party_names_2010 = [
+	"Independent Candidates",
+	"Wunthanu NLD (The Union Of Myanmar)",
+	"Peace and Diversity Party",
+	"Chin National Party",
+	"Rakhine Nationals Development Party",
+	"Rakhine State National Force Of Myanmar",
+	"Mro Or Khami National Solidarity Organization",
+	"Kaman National Progressive Party",
+	"United Democratic Party - Kachin State"
+      ];
+
+      for(var i = 0; i < party_names_2010.length; i++) {
+	party = party_names_2010[i];
+	party_records.push({
+	  _id: party_records.length + i,
+	  code: getPartyCode(party),
+	  name: {
+	    en: party
+	  }
+	});
+      }
 
       db.collection('party_records').insert(party_records, function(err, doc) {
 	if (err) { reject(err); }
@@ -95,6 +111,7 @@ var getPartyCode = (function () {
 
     var sfx = 1;
     var party_code = code;
+
     while (party_codes.indexOf(party_code) != -1) {
       party_code = code + sfx;
     }

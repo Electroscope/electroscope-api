@@ -88,8 +88,8 @@ CandidateHandler.syncWithMaePaySoh = function () {
 		  /* add parliament  and insert */
 		  db.collection('party_records').findOne({_id : item.party}, function(err, doc) {
 		    if(err) { reject(err); }
-		    item.party = (doc == null) ? 0 : doc.code;
-		    item.party_name = (doc == null) ? 0 : doc.name.en;
+		    item.party = (doc == null) ? "IC" : doc.code;
+		    item.party_name = (doc == null) ? "Independent Candidates" : doc.name.en;
 		    db.collection('candidate_records').insert(item, callback);
 		  });
 		},
