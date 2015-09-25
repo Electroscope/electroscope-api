@@ -16,7 +16,6 @@ MaePaySohAPI.candidate.getAll = function () {
       'http://localhost:3000/candidate.json',
       function (err, resp, body) {
         if (err) { reject (err); }
-        console.log(body);
         var candidates = body.toString().split('\n').map(function (line) {
           try {return JSON.parse(line);}
           catch (err) {return null;}

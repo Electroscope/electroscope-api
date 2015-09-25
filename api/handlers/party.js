@@ -60,7 +60,7 @@ PartyHandler.syncWithMaePaySoh = function () {
       for(var i = 0; i < party_names_2010.length; i++) {
 	party = party_names_2010[i];
 	party_records.push({
-	  _id: party_records.length + i,
+	  _id: party_records.length + i + 1,
 	  code: getPartyCode(party),
 	  name: {
 	    en: party
