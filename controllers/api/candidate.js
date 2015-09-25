@@ -103,4 +103,14 @@ CandidateController.router.get("/candidates/count/by-agegroup", function (req, r
     });
 });
 
+CandidateController.router.get("/temp/state/count", function (req, res, next) {
+  var query = req.query;
+  CandidateHandler.partyCandidateCountByStates(query)
+    .then(function (result) {
+      res.send({data: result});
+    }).catch(function (err) {
+      next(err);
+    });
+});
+
 module.exports = CandidateController.router;
