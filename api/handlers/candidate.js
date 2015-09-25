@@ -409,10 +409,13 @@ CandidateHandler.getByAgegroupCount = function (query) {
 
   query.$initial_project = {
     agegroup: {
-      $cond: [{ $lt: [ "$candidate.age", 30 ] }, '<30',
-	      {$cond: [{ $lt: [ "$candidate.age", 50 ] }, '30-50',
-		       {$cond: [{ $lt: [ "$candidate.age", 70 ] }, '50-70',
-				'>70']}]}]
+      $cond: [{ $lt: [ "$candidate.age", 30 ] }, '20-30',
+	      {$cond: [{ $lt: [ "$candidate.age", 40 ] }, '30-40',
+		       {$cond: [{ $lt: [ "$candidate.age", 50 ] }, '40-50',
+				{$cond: [{ $lt: [ "$candidate.age", 60 ] }, '50-60',
+					{$cond: [{ $lt: [ "$candidate.age", 70 ] }, '60-70',
+						'70+']}]}
+			       ]}]}]
     }};
 
   var $group = {
