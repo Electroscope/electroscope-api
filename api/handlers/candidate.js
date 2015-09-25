@@ -690,7 +690,7 @@ CandidateHandler.partyCandidateCountByStates = function(query){
     },
     {
       $sort: {
-        st_pcode: -1
+        candidatesCount: -1
       }
     }
     ]).exec(function (err, result){
