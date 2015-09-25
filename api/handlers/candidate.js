@@ -13,14 +13,15 @@ MaePaySohAPI.candidate.getAll = function () {
   return new Promise(function (resolve, reject) {
     request.get(
       //'https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
-      'http://localhost:2001/candidate.json',
+      'http://localhost:3000/candidate.json',
       function (err, resp, body) {
-	if (err) { reject (err); }
-	var candidates = body.toString().split('\n').map(function (line) {
-	  try {return JSON.parse(line);}
-	  catch (err) {return null;}
-	});
-	resolve(candidates);
+        if (err) { reject (err); }
+        console.log(body);
+        var candidates = body.toString().split('\n').map(function (line) {
+          try {return JSON.parse(line);}
+          catch (err) {return null;}
+        });
+        resolve(candidates);
       });
   });
 };
@@ -153,12 +154,13 @@ CandidateHandler.getCount = function(request) {
     	    religion: "$_id.candidate_religion",
     	    agegroup: "$_id.agegroup",
 	    state: "$_id.state",
-	    educated: "$_id.educated",
+	    educated: "$_id.educated"
     	  }
     });
 
     if (request.$post_pipeline) {
       pipeline = pipeline.concat(request.$post_pipeline);
+      pipeline.push({$sort: {total_count: -1}});
     }
 
     db.candidate_records.aggregate(pipeline, function(err, result) {
