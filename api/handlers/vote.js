@@ -27,6 +27,7 @@ VoteHandler.getCount = function(request) {
   /* optional parameters */
   if (request.party) { $match.party = request.party; }
   if (request.state) { $match.state = request.state; }
+  if (request.state_code) { $match.state_code = request.state_code; }
   if (request.constituency) { $match.constituency = request.constituency; }
   if (request.parliament) { $match.parliament = request.parliament; }
 
@@ -35,7 +36,7 @@ VoteHandler.getCount = function(request) {
 
     var $project = {
       constituency: 1, parliament: 1, party: 1,
-      year: 1, candidate:1, _id: 0, state: 1,
+      year: 1, candidate:1, _id: 0, state: 1, state_code: 1,
       educated: 1, votes: 1
     };
 
@@ -60,6 +61,7 @@ VoteHandler.getCount = function(request) {
     	    religion: "$_id.candidate_religion",
     	    agegroup: "$_id.agegroup",
     	    state: "$_id.state",
+	    state_code: "$_id.state_code",
     	    educated: "$_id.educated"
     	  }
     });
