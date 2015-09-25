@@ -67,6 +67,10 @@ CandidateHandler.syncWithMaePaySoh = function () {
 	  record.constituency = c.constituency.TS_PCODE;
 	}
 
+	if (record.constituency) {
+	  record.state_code = record.constituency.slice(0, 6);
+	}
+
 	record.educated = false;
 	if (c.education.match(/B\./)) {
 	  record.educated = true;
@@ -121,6 +125,7 @@ CandidateHandler.getCount = function(request) {
   /* optional parameters */
   if (request.party) { $match.party = request.party; }
   if (request.state) { $match.state = request.state; }
+  if (request.state_code) { $match.state_code = request.state_code; }
   if (request.constituency) { $match.constituency = request.constituency; }
   if (request.parliament) { $match.parliament = request.parliament; }
 
@@ -129,7 +134,7 @@ CandidateHandler.getCount = function(request) {
 
     var $project = {
       constituency: 1, parliament: 1, party: 1,
-      year: 1, candidate:1, _id: 0, state: 1,
+      year: 1, candidate:1, _id: 0, state: 1, state_code: 1,
       educated: 1
     };
 
@@ -154,6 +159,7 @@ CandidateHandler.getCount = function(request) {
     	    religion: "$_id.candidate_religion",
     	    agegroup: "$_id.agegroup",
 	    state: "$_id.state",
+	    state_code: "$_id.state_code",
 	    educated: "$_id.educated"
     	  }
     });
@@ -479,15 +485,12 @@ CandidateHandler.getByNaytharCount = function (query) {
 
 var getParliament = function (candidate) {
   var parliaments = {
-    "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်": "-RGH",
+   "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်": "RGH",
     "ပြည်သူ့လွှတ်တော်": "PTH",
     "အမျိုးသားလွှတ်တော်": "AMH"
   };
 
   p = parliaments[candidate.legislature];
-  if (p == '-RGH') {
-    p = getState(candidate).toUpperCase() + p;
-  }
   return p;
 };
 
