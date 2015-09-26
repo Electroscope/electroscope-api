@@ -116,6 +116,8 @@ var getPartyCode = (function () {
       party_code = code + sfx;
     }
 
+    if (party_code == "NLFD") party_code = "NLD";
+    if (party_code == "USADP") party_code = "USDP";
     party_codes.push(party_code);
     return party_code;
   });

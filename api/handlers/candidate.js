@@ -156,7 +156,6 @@ CandidateHandler.getCount = function(request) {
     	    constituency: "$_id.constituency",
     	    gender: "$_id.candidate_gender",
     	    ethnicity: "$_id.candidate_ethnicity",
-	    naythar: "$_id.candidate_naythar",
     	    religion: "$_id.candidate_religion",
     	    agegroup: "$_id.agegroup",
 	    state: "$_id.state",
@@ -178,7 +177,6 @@ CandidateHandler.getCount = function(request) {
       });
       pipeline.push({$sort: $sort});
     }
-
 
     console.info("PIPELINE => ", pipeline);
 
@@ -420,8 +418,7 @@ CandidateHandler.getByAgegroupCount = function (query) {
 	      {$cond: [{ $lt: [ "$candidate.age", 40 ] }, '30-40',
 		       {$cond: [{ $lt: [ "$candidate.age", 50 ] }, '40-50',
 				{$cond: [{ $lt: [ "$candidate.age", 60 ] }, '50-60',
-					{$cond: [{ $lt: [ "$candidate.age", 70 ] }, '60-70',
-						'70+']}]}
+					'60+']}
 			       ]}]}]
     }};
 
@@ -434,40 +431,6 @@ CandidateHandler.getByAgegroupCount = function (query) {
   var $project =  {
     _id: 0,
     agegroup_counts: 1,
-    total_count: 1
-  };
-
-  if (group_by) {
-    $project[group_by] = "$_id";
-    $group._id = '$' + group_by;
-  }
-
-  query.$post_pipeline = [
-    { $group: $group},
-    { $project: $project}
-  ];
-
-  return CandidateHandler.getCount(query);
-};
-
-CandidateHandler.getByNaytharCount = function (query) {
-  query.year = 2015;
-  var group_by = query.group_by;
-  query.group_by = group_by ?  group_by + ',candidate.naythar': 'candidate.naythar';
-
-  query.$initial_project = {
-    naythar: 1
-  };
-
-  var $group = {
-    _id: null,
-    naythar_counts: {$addToSet: {count: "$count", naythar: '$naythar'}},
-    total_count: {$sum: '$count'}
-  };
-
-  var $project =  {
-    _id: 0,
-    naythar_counts: 1,
     total_count: 1
   };
 

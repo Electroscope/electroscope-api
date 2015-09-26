@@ -53,6 +53,8 @@ WinnerHandler.getWinnerCount = function(request) {
     	    count: 1,
     	    party: "$_id.party",
 	    state: "$_id.state",
+    	    parliament: "$_id.parliament",
+    	    constituency: "$_id.constituency",
 	    state_code: "$_id.state_code"
     	  }
     });
@@ -71,7 +73,7 @@ WinnerHandler.getWinnerCount = function(request) {
       pipeline.push({$sort: $sort});
     }
 
-    console.info("PIPELINE => ", pipeline);
+    console.info("PIPELINE => ", JSON.stringify(pipeline));
 
     db.candidate_records.aggregate(pipeline, function(err, result) {
       if (err) {
@@ -114,7 +116,7 @@ WinnerHandler.getWinnerCountByParty = function (query) {
   return WinnerHandler.getWinnerCount(query);
 };
 
-WinnerHandler.getByStateCount = function (query) {
+WinnerHandler.getWinnerCountByState = function (query) {
     /* if there is no year parameter use 2015 by default */
     /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
@@ -146,7 +148,7 @@ WinnerHandler.getByStateCount = function (query) {
   return WinnerHandler.getWinnerCount(query);
 };
 
-WinnerHandler.getByParliamentCount = function (query) {
+WinnerHandler.getWinnerCountByParliament = function (query) {
     /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
   var group_by = query.group_by;
@@ -175,6 +177,6 @@ WinnerHandler.getByParliamentCount = function (query) {
   ];
 
   return WinnerHandler.getWinnerCount(query);
-}
+};
 
 module.exports = WinnerHandler;

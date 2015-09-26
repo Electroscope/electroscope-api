@@ -120,13 +120,13 @@ VoteHandler.getByParliamentCount = function (query) {
 
   var $group = {
     _id: null,
-    party_counts: {$addToSet: {votes: "$votes", party: '$parliament'}},
+    parliament_counts: {$addToSet: {votes: "$votes", parliament: '$parliament'}},
     total_votes: {$sum: '$votes'}
   };
 
   var $project =  {
     _id: 0,
-    party_counts: 1,
+    parliament_counts: 1,
     total_votes: 1
   };
 
@@ -151,13 +151,13 @@ VoteHandler.getByStateCount = function (query) {
 
   var $group = {
     _id: null,
-    party_counts: {$addToSet: {votes: "$votes", party: '$state'}},
+    state_counts: {$addToSet: {votes: "$votes", state: '$state'}},
     total_votes: {$sum: '$votes'}
   };
 
   var $project =  {
     _id: 0,
-    party_counts: 1,
+    state_counts: 1,
     total_votes: 1
   };
 
