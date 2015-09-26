@@ -12,8 +12,8 @@ var db = mongojs('electroscope', ['candidate_records', 'party_records']);
 MaePaySohAPI.candidate.getAll = function () {
   return new Promise(function (resolve, reject) {
     request.get(
-      //'https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
-      'http://localhost:3000/candidate.json',
+      'https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
+      // 'http://localhost:3000/candidate.json',
       function (err, resp, body) {
         if (err) { reject (err); }
         var candidates = body.toString().split('\n').map(function (line) {

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nodemon ./bin/www.js",
     "test": "mocha",
-      "postinstall": "node ./api/interactors/syncWithMaepaysoh && cd mongo && node init.js"
+    "postinstall": "node ./api/interactors/syncWithMaepaysoh && node mongo/init.js"
   },
   "dependencies": {
     "body-parser": "~1.13.1",
