@@ -14,6 +14,7 @@ MaePaySohAPI.candidate.getAll = function () {
     request.get(
       'https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
       // 'http://localhost:3000/candidate.json',
+      // 'http://localhost:9090/party.json',
       function (err, resp, body) {
         if (err) { reject (err); }
         var candidates = body.toString().split('\n').map(function (line) {
@@ -32,77 +33,76 @@ CandidateHandler.syncWithMaePaySoh = function () {
       console.log("RECEIVED: " + candidates.length + " records.");
     }).then(function (candidates) {
       db.collection('candidate_records').drop(function (){
-	console.log("DROPPED: Existing records.");
+        console.log("DROPPED: Existing records.");
       });
 
       var candidate_records = [];
       for (var i = 0; i < candidates.length; i += 1) {
-	var c = candidates[i];
-	if (c == null) { continue; }
+        var c = candidates[i];
+        if (c == null) { continue; }
 
-	var record = {};
-	record.year = 2015;
-	record.candidate = {};
-	record.candidate.name = c.name;
-	record.candidate.religion = c.religion;
-	record.candidate.ethnicity = c.ethnicity;
-	record.candidate.gender = c.gender;
-	record.candidate.birthdate = new Date(c.birthdate.$date);
-	record.candidate.age = new Date().getYear() - new Date(c.birthdate.$date).getYear();
-	record.candidate.naythar = new Date(c.birthdate.$date).getDay();
+        var record = {};
+        record.year = 2015;
+        record.candidate = {};
+        record.candidate.name = c.name;
+        record.candidate.religion = c.religion;
+        record.candidate.ethnicity = c.ethnicity;
+        record.candidate.gender = c.gender;
+        record.candidate.birthdate = new Date(c.birthdate.$date);
+        record.candidate.age = new Date().getYear() - new Date(c.birthdate.$date).getYear();
+        record.candidate.naythar = new Date(c.birthdate.$date).getDay();
 
-	record.party = c.party_id;
-	record.parliament = getParliament(c);
-	record.state = getState(c, record.parliament);
+        record.party = c.party_id;
+        record.parliament = getParliament(c.legislature);
+        record.state = getState(c, record.parliament);
 
-	switch (record.parliament) {
-	case 'PTH':
-	  record.constituency = c.constituency.TS_PCODE;
-	  break;
-	case 'AMH':
-	  record.constituency = c.constituency.AM_PCODE;
-	  break;
-	default:
-	  record.constituency = c.constituency.TS_PCODE;
-	}
+        switch (record.parliament) {
+          case 'PTH':
+            record.constituency = c.constituency.TS_PCODE;
+            break;
+          case 'AMH':
+            record.constituency = c.constituency.AM_PCODE;
+            break;
+          default:
+            record.constituency = c.constituency.TS_PCODE;
+        }
 
-	if (!record.constituency) {
-	  record.constituency = guessConstituency(c);
-	}
+        if (!record.constituency) {
+          record.constituency = guessConstituency(c);
+        }
 
-	record.state_code = record.constituency.slice(0, 6);
+        if (record.constituency) {
+          record.state_code = record.constituency.slice(0, 6);
+        } else {
+          record.state_code = null;
+        }
 
-	record.educated = false;
-	if (c.education.match(/B\./)) {
-	  record.educated = true;
-	}
+        record.educated = false;
 
-	if (c.education.indexOf("ဘွဲ့") != -1){
-	  record.educated = true;
-	}
+        var edu = c.education.toLowerCase();
 
-	if (c.education.match(/Dip/)) {
-	  record.educated = true;
-	}
+        if (edu.match(/ph\.d|ll\.|b\.|m\.b\.|bvsc|ma|bsc|ဘွဲ့|မဟာ|dip/)) {
+          record.educated = true;
+        }
 
-	candidate_records.push(record);
+        candidate_records.push(record);
       }
 
       async.map(candidate_records,
-		function (item, callback) {
-		  /* add parliament  and insert */
-		  db.collection('party_records').findOne({_id : item.party}, function(err, doc) {
-		    if(err) { reject(err); }
-		    item.party = (doc == null) ? "IC" : doc.code;
-		    item.party_name = (doc == null) ? "Independent Candidates" : doc.name.en;
-		    db.collection('candidate_records').insert(item, callback);
-		  });
-		},
-		function (err, results) {
-		  if (err) { reject(err); }
-		  resolve(candidate_records);
-		}
-	       );
+        function (item, callback) {
+          /* add parliament  and insert */
+          db.collection('party_records').findOne({_id : item.party}, function(err, doc) {
+            if(err) { reject(err); }
+            item.party = (doc == null) ? "IC" : doc.code;
+            item.party_name = (doc == null) ? "Independent Candidates" : doc.name.en;
+            db.collection('candidate_records').insert(item, callback);
+          });
+        },
+        function (err, results) {
+          if (err) { reject(err); }
+          resolve(candidate_records);
+        }
+      );
     }).catch(reject);
   });
 };
@@ -148,20 +148,20 @@ CandidateHandler.getCount = function(request) {
     pipeline.push({$group: $group});
 
     pipeline.push({
-    	  $project: {
-    	    _id: 0,
-    	    count: 1,
-    	    party: "$_id.party",
-    	    parliament: "$_id.parliament",
-    	    constituency: "$_id.constituency",
-    	    gender: "$_id.candidate_gender",
-    	    ethnicity: "$_id.candidate_ethnicity",
-    	    religion: "$_id.candidate_religion",
-    	    agegroup: "$_id.agegroup",
-	    state: "$_id.state",
-	    state_code: "$_id.state_code",
-	    educated: "$_id.educated"
-    	  }
+      $project: {
+        _id: 0,
+        count: 1,
+        party: "$_id.party",
+        parliament: "$_id.parliament",
+        constituency: "$_id.constituency",
+        gender: "$_id.candidate_gender",
+        ethnicity: "$_id.candidate_ethnicity",
+        religion: "$_id.candidate_religion",
+        agegroup: "$_id.agegroup",
+      state: "$_id.state",
+      state_code: "$_id.state_code",
+      educated: "$_id.educated"
+        }
     });
 
     if (request.$post_pipeline) {
@@ -173,7 +173,7 @@ CandidateHandler.getCount = function(request) {
       var $sort = {};
       var sort_list = request.sort_by.split(',');
       sort_list.forEach(function (each) {
-	$sort[each] =1;
+        $sort[each] =1;
       });
       pipeline.push({$sort: $sort});
     }
@@ -182,9 +182,9 @@ CandidateHandler.getCount = function(request) {
 
     db.candidate_records.aggregate(pipeline, function(err, result) {
       if (err) {
-    	reject(err);
+      reject(err);
       } else {
-    	resolve(result);
+      resolve(result);
       }
     });
   });
@@ -223,7 +223,7 @@ CandidateHandler.getByGenderCount = function(query){
 };
 
 CandidateHandler.getByPartyCount = function (query) {
-    /* if there is no year parameter use 2015 by default */
+  /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
   var group_by = query.group_by;
   query.group_by = group_by ?  group_by + ',party': 'party';
@@ -254,7 +254,7 @@ CandidateHandler.getByPartyCount = function (query) {
 };
 
 CandidateHandler.getEducatedCount = function (query) {
-    /* if there is no year parameter use 2015 by default */
+  /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
   var group_by = query.group_by;
   query.group_by = group_by ?  group_by + ',educated': 'educated';
@@ -285,7 +285,7 @@ CandidateHandler.getEducatedCount = function (query) {
 };
 
 CandidateHandler.getByParliamentCount = function (query) {
-    /* if there is no year parameter use 2015 by default */
+  /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
   var group_by = query.group_by;
   query.group_by = group_by ?  group_by + ',parliament': 'parliament';
@@ -316,8 +316,8 @@ CandidateHandler.getByParliamentCount = function (query) {
 };
 
 CandidateHandler.getByStateCount = function (query) {
-    /* if there is no year parameter use 2015 by default */
-    /* if there is no year parameter use 2015 by default */
+  /* if there is no year parameter use 2015 by default */
+  /* if there is no year parameter use 2015 by default */
   query.year = query.year || 2015;
   var group_by = query.group_by;
   query.group_by = group_by ?  group_by + ',state': 'state';
@@ -415,11 +415,11 @@ CandidateHandler.getByAgegroupCount = function (query) {
   query.$initial_project = {
     agegroup: {
       $cond: [{ $lt: [ "$candidate.age", 30 ] }, '20-30',
-	      {$cond: [{ $lt: [ "$candidate.age", 40 ] }, '30-40',
-		       {$cond: [{ $lt: [ "$candidate.age", 50 ] }, '40-50',
-				{$cond: [{ $lt: [ "$candidate.age", 60 ] }, '50-60',
-					'60+']}
-			       ]}]}]
+        {$cond: [{ $lt: [ "$candidate.age", 40 ] }, '30-40',
+           {$cond: [{ $lt: [ "$candidate.age", 50 ] }, '40-50',
+        {$cond: [{ $lt: [ "$candidate.age", 60 ] }, '50-60',
+          '60+']}
+             ]}]}]
     }};
 
   var $group = {
@@ -447,7 +447,7 @@ CandidateHandler.getByAgegroupCount = function (query) {
   return CandidateHandler.getCount(query);
 };
 
-var guessConstituency = function (candidate) {
+function guessConstituency(candidate) {
   var towncodes = require('./constituency-code.json');
   var location = candidate.constituency.name;
 
@@ -466,18 +466,19 @@ var guessConstituency = function (candidate) {
   return towncodes[location];
 };
 
-var getParliament = function (candidate) {
-  var parliaments = {
-   "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်": "RGH",
-    "ပြည်သူ့လွှတ်တော်": "PTH",
-    "အမျိုးသားလွှတ်တော်": "AMH"
-  };
-
-  p = parliaments[candidate.legislature];
-  return p;
+function getParliament(candidate) {
+  if (candidate.match(/ပြည်နယ်|တိုင်း/)) {
+    return "RGH";
+  } else if (candidate.match(/ပြည်သူ/)) {
+    return "PTH";
+  } else if (candidate.match(/အမျိုးသား/)) {
+    return "AMH";
+  } else {
+    return null;
+  }
 };
 
-var getState = function (candidate){
+function getState(candidate){
   var statenames = {
     "ကချင်ပြည်နယ်": "Kachin",
     "ကယားပြည်နယ်": "Kayah",
@@ -521,6 +522,7 @@ const LEGISLATURES = {
   upper_house: "အမျိုးသားလွှတ်တော်",
   regional_house: "တိုင်းဒေသကြီး/ပြည်နယ် လွှတ်တော်"
 };
+
 CandidateHandler.getCandidateCountPerConstituency = function(query){
   var model = this.model;
   var match = {};
