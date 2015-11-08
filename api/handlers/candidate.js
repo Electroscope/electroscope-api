@@ -4,17 +4,17 @@ var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
 
 var CandidateHandler = new Handler(CandidateModel);
 
-var async = require('async');
-var request = require('request');
+var async = require("async");
+var request = require("request");
 var mongojs = require("mongojs");
-var db = mongojs('electroscope', ['candidate_records', 'party_records']);
+var db = mongojs("electroscope", ["candidate_records", "party_records"]);
 
 MaePaySohAPI.candidate.getAll = function () {
   return new Promise(function (resolve, reject) {
     request.get(
-      'https://raw.githubusercontent.com/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json',
-      // 'http://localhost:3000/candidate.json',
-      // 'http://localhost:9090/party.json',
+      "https://raw.githubusercontent.com" +
+      "/MyanmarAPI/candidate-endpoint/master/storage/data/candidate.json",
+      // "http://localhost:3000/candidate.json",
       function (err, resp, body) {
         if (err) { reject (err); }
         var candidates = body.toString().split('\n').map(function (line) {
@@ -32,7 +32,7 @@ CandidateHandler.syncWithMaePaySoh = function () {
     MaePaySohAPI.candidate.getAll(function (candidates) {
       console.log("RECEIVED: " + candidates.length + " records.");
     }).then(function (candidates) {
-      db.collection('candidate_records').drop(function (){
+      db.collection("candidate_records").drop(function (){
         console.log("DROPPED: Existing records.");
       });
 
