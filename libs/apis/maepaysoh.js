@@ -2,9 +2,10 @@ var request = require("request");
 function catchError(callback) {
   return function (err, res, body) {
     if (err) {
+      console.log("error in body");
       return callback(err);
     }
-    body = JSON.parse(body);
+    // body = JSON.parse(body);
     var error = body.error || body.errors;
     var status = res.statusCode;
 
@@ -75,6 +76,8 @@ var MaePaySoh = {
         url: URL,
         qs: query
       }, catchError(function (err, data) {
+         console.log("error in body", URL);
+
         if (err) {
           reject(err);
         } else {
@@ -91,11 +94,14 @@ var MaePaySoh = {
         if (pagin.current_page < pagin.total_pages) {
           that.getList(URL, query, pagin.current_page + 1)
             .then(function(data){
+              console.log("Data recurs", query, data.meta);
               if (pipe) pipe(data.data);
               prevData = prevData.concat(data.data);
               nextPage(prevData, data.meta && data.meta.pagination || data._meta);
             })
             .catch(function (err) {
+                        console.log("no pagin");
+
               reject(err);
             });
         } else {
