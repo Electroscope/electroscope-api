@@ -27,7 +27,7 @@ db.batchInsert = function(collection, docs, options, callback) {
 
 emitter.on("import_done", function(data){
   console.log("Imported count", data);
-  if(data === 6){
+  if(data === 8){
     console.log("Closing connection now");
     db.close();
     process.exit(0);
@@ -104,19 +104,19 @@ db.collection('parliaments').drop(function(){
   });
 });
 
-// db.collection('party_records').drop(function(){
-//   console.log("Importing Parties ...");
-//   var parties = require('./parties.json');
-//   db.collection('party_records').insert(parties, function(err, data){
-//   count += 1;
-//     if(err){
-//       throw err;
-//     }
-//     console.log("party_records count", count);
-//     db.collection('party_records').ensureIndex({"location_code": 1});
-//     emitter.emit('import_done', count);
-//   });
-// });
+db.collection('party_records').drop(function(){
+  console.log("Importing Parties ...");
+  var parties = require('./parties.json');
+  db.collection('party_records').insert(parties, function(err, data){
+  count += 1;
+    if(err){
+      throw err;
+    }
+    console.log("party_records count", count);
+    db.collection('party_records').ensureIndex({"location_code": 1});
+    emitter.emit('import_done', count);
+  });
+});
 
 console.log("Importing Candidate Records ...");
 var c2010 = require('./candidate_records_2010.json');
@@ -129,6 +129,23 @@ db.batchInsert(collection, c2010, function(err, data){
   track -= 1;
   console.log("\rCandidate Record Left", track);
   if(track <= 0){
+    console.log("All candidates inserted now");
+    count += 1;
+    emitter.emit('import_done', count);
+  }
+});
+
+console.log("Importing Candidate Records 2015...");
+var c2015 = require('./candidate_records_2015.json');
+var collection2 = db.collection('candidates');
+var track2 = c2015.length;
+db.batchInsert(collection, c2015, function(err, data){
+  if(err){
+    throw err;
+  }
+  track2 -= 1;
+  console.log("\rCandidate Record Left", track);
+  if(track2 <= 0){
     console.log("All candidates inserted now");
     count += 1;
     emitter.emit('import_done', count);
