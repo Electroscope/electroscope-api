@@ -1,6 +1,7 @@
 var PartyModel = $.rootRequire("api/models/party");
 var Handler = $.rootRequire("api/handlers");
 var MaePaySohAPI = $.rootRequire("libs/apis/maepaysoh.js");
+var RawParites = $.rootRequire('parties_raw.json');
 
 var PartyHandler = new Handler(PartyModel);
 PartyHandler.update = null;
@@ -12,10 +13,11 @@ var db = mongojs('electroscope', ['party_records']);
 PartyHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
-    MaePaySohAPI.party.getAll(function (parties) {
+    MaePaySohAPI.candidate.getAll(function (parties) {
+      console.log("hello", parties);
       console.log("RECEIVED: " + parties.length + " records.");
-    }).then(function (parties) {
-
+    }, {per_page: 100}).then(function (parties) {
+      parties = RawParites;
       db.collection('party_records').drop(function (){
 	console.log("DROPPED: Existing records.");
       });
@@ -99,6 +101,8 @@ var getPartyCode = (function () {
   var party_codes = [];
 
   return (function (english_name) {
+    console.log("english name", english_name);
+    if(!english_name) { console.log(party) return null; }
     var code = english_name.toUpperCase()
 	  .split(' ')
 	  .map(function (x) {
