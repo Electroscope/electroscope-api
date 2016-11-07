@@ -5,7 +5,7 @@ function catchError(callback) {
       console.log("error in body");
       return callback(err);
     }
-    // body = JSON.parse(body);
+    body = JSON.parse(body);
     var error = body.error || body.errors;
     var status = res.statusCode;
 
@@ -66,7 +66,7 @@ var MaePaySoh = {
     var that = this;
     URL = that.host + URL;
     query = query || {};
-    query.per_page = 200;
+    // query.per_page = 200;
     query.token = that._token;
     if (page && !isNaN(page)) {
       query.page = page;
@@ -95,7 +95,10 @@ var MaePaySoh = {
           that.getList(URL, query, pagin.current_page + 1)
             .then(function(data){
               console.log("Data recurs", query, data.meta);
-              if (pipe) pipe(data.data);
+              if (pipe) { 
+                // console.log(pipe, JSON.parse(data));
+                pipe(data.data);
+              }
               prevData = prevData.concat(data.data);
               nextPage(prevData, data.meta && data.meta.pagination || data._meta);
             })

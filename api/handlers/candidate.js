@@ -91,7 +91,8 @@ CandidateHandler.syncWithMaePaySoh = function () {
       async.map(candidate_records,
         function (item, callback) {
           /* add parliament  and insert */
-          db.collection('party_records').findOne({_id : item.party}, function(err, doc) {
+          console.log(item);
+          db.collection('party_records').findOne({__id : item.party}, function(err, doc) {
             if(err) { reject(err); }
             item.party = (doc == null) ? "IC" : doc.code;
             item.party_name = (doc == null) ? "Independent Candidates" : doc.name.en;
@@ -249,6 +250,8 @@ CandidateHandler.getByPartyCount = function (query) {
     { $group: $group},
     { $project: $project}
   ];
+
+  console.log(query);
 
   return CandidateHandler.getCount(query);
 };

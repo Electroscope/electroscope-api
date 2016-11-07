@@ -13,21 +13,23 @@ var db = mongojs('electroscope', ['party_records']);
 PartyHandler.syncWithMaePaySoh = function () {
   var handler = this;
   return new Promise(function (resolve, reject) {
-    MaePaySohAPI.candidate.getAll(function (parties) {
+    MaePaySohAPI.party.getAll(function (parties) {
       console.log("hello", parties);
       console.log("RECEIVED: " + parties.length + " records.");
     }, {per_page: 100}).then(function (parties) {
-      parties = RawParites;
+      console.log("Orig Parties", parties.length);
+      // parties = RawParites;
       db.collection('party_records').drop(function (){
 	console.log("DROPPED: Existing records.");
       });
 
       var party_records = [];
       for (var i = 0; i < parties.length; i++) {
+        console.log(p);
       	var p = parties[i];
       	var party = {};
 
-	party._id = p['id'];
+	party.__id = p["id"];
 	var party_name_english = p['party_name_english'];
 
 	if (p['party_name_english'] == "0" ) {
@@ -62,7 +64,7 @@ PartyHandler.syncWithMaePaySoh = function () {
       for(var i = 0; i < party_names_2010.length; i++) {
 	party = party_names_2010[i];
 	party_records.push({
-	  _id: party_records.length + i + 1,
+	  __id: party_records.length + i + 1,
 	  code: getPartyCode(party),
 	  name: {
 	    en: party
@@ -102,7 +104,7 @@ var getPartyCode = (function () {
 
   return (function (english_name) {
     console.log("english name", english_name);
-    if(!english_name) { console.log(party) return null; }
+    if(!english_name) { return null; }
     var code = english_name.toUpperCase()
 	  .split(' ')
 	  .map(function (x) {
@@ -123,6 +125,7 @@ var getPartyCode = (function () {
     if (party_code == "NLFD") party_code = "NLD";
     if (party_code == "USADP") party_code = "USDP";
     party_codes.push(party_code);
+    console.log("Code for party "+ english_name + "=> ", party_code);
     return party_code;
   });
 
